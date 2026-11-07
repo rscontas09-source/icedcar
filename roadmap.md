@@ -2,4 +2,5 @@
 - [x] Compare desktop and phone sections and observe source controls.
 - [x] Verify repaired controls and document partial-import limitations.
 - [x] Prepare one IcedCar Meta creative with clear explanatory text; approve exact wording before rendering.
-- [ ] Create one paused Purchase campaign and one ad set for Brazil after creative, targeting, measurement and budget approvals.
+- [x] Add advertising cookie choices, privacy notice and confirmed-payment browser event; test consent and payment-status rules.
+- [ ] Create one paused Purchase campaign and one ad set for Brazil — awaiting budget periodicity/exact approval, Page identity resolution and published payment-event verification.
