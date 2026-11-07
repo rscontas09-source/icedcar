@@ -1,4 +1,6 @@
-export const UNIT_PRICE = 7900; // centavos
+export const UNIT_PRICE = 7900; // centavos (preço base, PIX aplica 5% em cima)
+export const CARD_UNIT_PRICE = 9900; // preço sem desconto no cartão
+export const MAX_INSTALLMENTS = 12;
 export const PRIORITY_PRICE = 1490;
 export const PIX_DISCOUNT = 0.05;
 export const FREE_SHIPPING_FROM = 19900;
@@ -28,8 +30,11 @@ export function shipping(order: Order) {
 export function pixTotal(order: Order) {
   return Math.round(subtotal(order) * (1 - PIX_DISCOUNT)) + shipping(order);
 }
+export function cardSubtotal(order: Order) {
+  return order.items.reduce((s, i) => s + CARD_UNIT_PRICE + (i.prioridade ? PRIORITY_PRICE : 0), 0);
+}
 export function cardTotal(order: Order) {
-  return subtotal(order) + shipping(order);
+  return cardSubtotal(order) + shipping(order);
 }
 export const brl = (c: number) => (c / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
