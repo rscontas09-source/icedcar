@@ -1,5 +1,5 @@
 - [x] Import supplied product page and original assets.
 - [x] Compare desktop and phone sections and observe source controls.
 - [x] Verify repaired controls and document partial-import limitations.
-- [ ] Prepare one IcedCar Meta creative with clear explanatory text; approve exact wording before rendering.
+- [x] Prepare one IcedCar Meta creative with clear explanatory text; approve exact wording before rendering.
 - [ ] Create one paused Purchase campaign and one ad set for Brazil after creative, targeting, measurement and budget approvals.
