@@ -47,18 +47,16 @@ export const createPixPayment = createServerFn({ method: "POST" })
       delivery: { fee, address: { country: "BR", state: address.state, city: address.city, district: address.district,
         street: address.street, number: address.number, complement: address.complement || undefined,
         zipCode: address.zipCode.replace(/(\d{5})(\d{3})/, "$1-$2") } },
-      metadata: { provider: "gelaki-icedcar", orderId, sellerTaxId: process.env["MASTERFY_SELLER_TAX_ID"] ?? null,
-        sellerEmail: process.env["MASTERFY_SELLER_EMAIL"] ?? null, checkoutUrl: null, returnUrl: null, shopUrl: null, referrerLink: null,
-        extra: JSON.stringify(order.items).slice(0, 2000) },
+      metadata: Object.fromEntries(Object.entries({ provider: "gelaki-icedcar", orderId, sellerTaxId: process.env["MASTERFY_SELLER_TAX_ID"], sellerEmail: process.env["MASTERFY_SELLER_EMAIL"] }).filter(([, v]) => v)),
     };
     void subtotal;
     try {
       const res = await fetch("https://api.masterfypagamentos.com/v1/payment", {
         method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
-      const json = (await res.json().catch(() => ({}))) as { id?: string; amount?: number; data?: { copypaste?: string }; message?: string; code?: string };
+      const json = (await res.json().catch(() => ({}))) as { id?: string; amount?: number; data?: { copypaste?: string }; message?: string; code?: string; details?: unknown };
       if (!res.ok || !json.data?.copypaste) {
-        console.error("Masterfy error", res.status, json.code, json.message);
+        console.error("Masterfy error", res.status, json.code, json.message, JSON.stringify(json));
         return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
       }
       return { ok: true as const, id: json.id ?? orderId, orderId, amount: (json.amount ?? amount) + fee, copypaste: json.data.copypaste };
