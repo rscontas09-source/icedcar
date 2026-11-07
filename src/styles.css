@@ -153,3 +153,84 @@
     color: var(--color-foreground);
   }
 }
+
+/* site-import tokens: begin (generated; re-import replaces this block) */
+/* Imported clone roles use prefixed Tailwind utilities
+   (bg-site-import-primary, text-site-import-foreground, …); edit the
+   --site-import-* variables to restyle the clone. Unprefixed roles theme new UI. */
+:root {
+  --background: oklch(1 0 0);
+  --site-import-background: oklch(1 0 0);
+  --foreground: oklch(0 0 0);
+  --site-import-foreground: oklch(0 0 0);
+  --primary: oklch(0.25401 0.0489 313.83);
+  --site-import-primary: oklch(0.25401 0.0489 313.83);
+  --primary-foreground: oklch(0.985 0 0);
+  --site-import-primary-foreground: oklch(0.985 0 0);
+  --accent: oklch(0.82267 0.03415 244.04);
+  --site-import-accent: oklch(0.82267 0.03415 244.04);
+  --border: oklch(0.91688 0.02467 242.36);
+  --site-import-border: oklch(0.91688 0.02467 242.36);
+  --muted-foreground: oklch(0.4955 0.04229 314.41);
+  --site-import-muted-foreground: oklch(0.4955 0.04229 314.41);
+  --card: oklch(0.93 0.01281 244.26);
+  --site-import-card: oklch(0.93 0.01281 244.26);
+  --muted: oklch(0.96886 0.01172 239.9);
+  --site-import-muted: oklch(0.96886 0.01172 239.9);
+}
+/* Design tokens captured from the imported site, registered as Tailwind
+   utilities (bg-<name>, text-<name>, font-<name>). var() values live in
+   the imported stylesheet's :root. */
+@theme inline {
+  --font-sans: "DM Sans Tema", "DM Sans Tema Fallback", system-ui, "Segoe UI", sans-serif, system-ui, sans-serif;
+  --color-site-import-background: var(--site-import-background);
+  --color-site-import-foreground: var(--site-import-foreground);
+  --color-site-import-primary: var(--site-import-primary);
+  --color-site-import-primary-foreground: var(--site-import-primary-foreground);
+  --color-site-import-accent: var(--site-import-accent);
+  --color-site-import-border: var(--site-import-border);
+  --color-site-import-muted-foreground: var(--site-import-muted-foreground);
+  --color-site-import-card: var(--site-import-card);
+  --color-site-import-muted: var(--site-import-muted);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-background: var(--brand-background);
+  --color-brand-black: var(--brand-black);
+  --color-brand-border: var(--brand-border);
+  --color-brand-cta-buy: var(--brand-cta-buy);
+  --color-brand-element-yellow: var(--brand-element-yellow);
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-secondary-accent: var(--brand-secondary-accent);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-text: var(--brand-text);
+  --color-kids-borda: var(--kids-borda);
+  --color-kids-cta: var(--kids-cta);
+  --color-kids-cta-hover: var(--kids-cta-hover);
+  --color-kids-cta-suave: var(--kids-cta-suave);
+  --color-kids-estrela: var(--kids-estrela);
+  --font-kids-fonte-corpo: var(--kids-fonte-corpo);
+  --font-kids-fonte-titulo: var(--kids-fonte-titulo);
+  --color-kids-fundo: var(--kids-fundo);
+  --color-kids-fundo-suave: var(--kids-fundo-suave);
+  --color-kids-rosa: var(--kids-rosa);
+  --color-kids-rosa-borda: var(--kids-rosa-borda);
+  --color-kids-rosa-hover: var(--kids-rosa-hover);
+  --color-kids-rosa-suave: var(--kids-rosa-suave);
+  --color-kids-rosa-texto: var(--kids-rosa-texto);
+  --color-kids-roxo: var(--kids-roxo);
+  --color-kids-roxo-suave: var(--kids-roxo-suave);
+  --color-kids-sale: var(--kids-sale);
+  --color-kids-sale-suave: var(--kids-sale-suave);
+  --color-kids-texto: var(--kids-texto);
+  --color-kids-texto-suave: var(--kids-texto-suave);
+}
+/* site-import tokens: end */
+
+/* Focused repairs for the observed imported overlays. */
+:root { --import-overlay: oklch(0 0 0 / 45%); }
+.import-overlay { position: fixed; inset: 0; z-index: 75; }
+.import-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; background: var(--import-overlay); }
+.import-zoom { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:var(--kids-fundo); }
+.import-zoom > img { max-width:94vw; max-height:80vh; object-fit:contain; }
+.import-close { position:absolute; top:16px; right:16px; width:44px; height:44px; font-size:28px; background:var(--kids-fundo-suave); border-radius:50%; }
+.import-validation { position:absolute; bottom:90px; left:50%; transform:translateX(-50%); background:var(--kids-sale-suave); color:var(--kids-sale); padding:8px 16px; z-index:80; }
+button[aria-pressed="true"], button[role="radio"][aria-checked="true"] { border-color:var(--kids-rosa); }

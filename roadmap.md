@@ -1,0 +1,3 @@
+- [x] Import supplied product page and original assets.
+- [x] Compare desktop and phone sections and observe source controls.
+- [x] Verify repaired controls and document partial-import limitations.

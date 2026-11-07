@@ -1,0 +1,258 @@
+[
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Buscar produtos",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Buscar-produtos.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Abrir carrinho",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Abrir-carrinho.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Ampliar imagem",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Ampliar-imagem.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Ver imagem 2",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Ver-imagem-2.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "formas de pagamento",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-formas-de-pagamento.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "2 unidades",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-2-unidades.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Personalizar",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Personalizar.png",
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Comprar agora",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Comprar-agora.png",
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Envio e prazo",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Envio-e-prazo.png",
+    "status": "passed",
+    "scroll": 1236
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 1280,
+      "height": 1800
+    },
+    "control": "Vem com nota fiscal?",
+    "layout": "desktop",
+    "screenshot": ".site-import/observations/preview-desktop-Vem-com-nota-fiscal.png",
+    "status": "passed",
+    "scroll": 2481
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Abrir menu",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Abrir-menu.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Buscar produtos",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Buscar-produtos.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Abrir carrinho",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Abrir-carrinho.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Ampliar imagem",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Ampliar-imagem.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Ver imagem 2",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Ver-imagem-2.png",
+    "status": "passed",
+    "scroll": 0
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "formas de pagamento",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-formas-de-pagamento.png",
+    "status": "passed",
+    "scroll": 462
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "2 unidades",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-2-unidades.png",
+    "status": "passed",
+    "scroll": 462
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Personalizar",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Personalizar.png",
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 462
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Comprar agora",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Comprar-agora.png",
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 462
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Envio e prazo",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Envio-e-prazo.png",
+    "status": "passed",
+    "scroll": 2608
+  },
+  {
+    "route": "/",
+    "viewport": {
+      "width": 390,
+      "height": 844
+    },
+    "control": "Vem com nota fiscal?",
+    "layout": "phone",
+    "screenshot": ".site-import/observations/preview-phone-Vem-com-nota-fiscal.png",
+    "status": "passed",
+    "scroll": 4280
+  }
+]
