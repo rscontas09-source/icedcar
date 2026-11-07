@@ -224,3 +224,13 @@
   --color-kids-texto-suave: var(--kids-texto-suave);
 }
 /* site-import tokens: end */
+
+/* Focused repairs for the observed imported overlays. */
+:root { --import-overlay: oklch(0 0 0 / 45%); }
+.import-overlay { position: fixed; inset: 0; z-index: 75; }
+.import-backdrop { position: absolute; inset: 0; width: 100%; height: 100%; background: var(--import-overlay); }
+.import-zoom { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:16px; background:var(--kids-fundo); }
+.import-zoom > img { max-width:94vw; max-height:80vh; object-fit:contain; }
+.import-close { position:absolute; top:16px; right:16px; width:44px; height:44px; font-size:28px; background:var(--kids-fundo-suave); border-radius:50%; }
+.import-validation { position:absolute; bottom:90px; left:50%; transform:translateX(-50%); background:var(--kids-sale-suave); color:var(--kids-sale); padding:8px 16px; z-index:80; }
+button[aria-pressed="true"], button[role="radio"][aria-checked="true"] { border-color:var(--kids-rosa); }
