@@ -76,7 +76,7 @@ function Checkout() {
     if (!f.district.trim()) e.district = "Informe o bairro.";
     if (f.city.trim().length < 2) e.city = "Informe a cidade.";
     if (!/^[A-Za-z]{2}$/.test(f.state)) e.state = "UF";
-    setErr(e);
+    setErr(e); console.log("VALIDATE", JSON.stringify(e), JSON.stringify(f));
     const first = Object.keys(e)[0];
     if (first) document.getElementById(`co-${first}`)?.focus();
     return !first;
