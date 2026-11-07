@@ -258,9 +258,9 @@ function Index() {
               <a className="text-[11px] underline" style={{ color: "var(--kids-texto-suave)" }} href="https://buscacepinter.correios.com.br/app/endereco/index.php" rel="noopener noreferrer" target="_blank">Não sei meu CEP</a>
             </div>
             <div className="flex items-center gap-2">
-              <input className={"min-h-[44px] min-w-0 flex-1 rounded-full \x70x-4 text-center \x74ext-sm \x6dd:\x74ext-left"} style={{ background: "var(--kids-fundo-suave)", border: "1px solid var(--kids-borda)", color: "var(--kids-texto)" } as CSSProperties} type="text" name="cep" autoComplete="postal-code" inputMode="numeric" placeholder="00000-000" maxLength={9} aria-label="Digite seu CEP" value={fields.cep ?? ""} onChange={e => { setFields({ ...fields, cep: e.target.value }); setShippingError(false); }} />
+              <input className={"min-h-[44px] min-w-0 flex-1 rounded-full \x70x-4 text-center \x74ext-sm \x6dd:\x74ext-left"} style={{ background: "var(--kids-fundo-suave)", border: "1px solid var(--kids-borda)", color: "var(--kids-texto)" } as CSSProperties} type="text" name="cep" autoComplete="postal-code" inputMode="numeric" placeholder="00000-000" maxLength={9} aria-label="Digite seu CEP" value={fields["cep"] ?? ""} onChange={e => { setFields({ ...fields, cep: e.target.value }); setShippingError(false); }} />
               <button className={"kids-btn kids-btn-rosa flex-shrink-0 \x70x-5 \x74ext-sm disabled:opacity-50"} type="button" onClick={() => setShippingError(true)}>Calcular</button>
-            </div>{shippingError && <p role="alert" className="text-kids-sale mt-3 text-xs">{(fields.cep ?? "").replace(/\D/g, "").length !== 8 ? "CEP inválido. Digite um CEP com 8 dígitos." : "Consulta de prazo indisponível."}</p>}
+            </div>{shippingError && <p role="alert" className="text-kids-sale mt-3 text-xs">{(fields["cep"] ?? "").replace(/\D/g, "").length !== 8 ? "CEP inválido. Digite um CEP com 8 dígitos." : "Consulta de prazo indisponível."}</p>}
           </div>
         </div>
         <section className={"\x70y-6"} aria-label="Descrição do produto">
