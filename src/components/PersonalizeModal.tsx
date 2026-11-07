@@ -84,7 +84,7 @@ export function PersonalizeModal({ quantity, onClose }: { quantity: number; onCl
   const summary = [it.lado, it.tipo, it.marca, it.modelo, it.ano, it.cor, it.placa && `“${it.placa}”`].filter(Boolean).join(" · ");
 
   return (
-    <div className="import-overlay" role="dialog" aria-modal="true" aria-labelledby="kids-personalizar-titulo">
+    <div className="import-overlay" data-theme="kids" role="dialog" aria-modal="true" aria-labelledby="kids-personalizar-titulo">
       <button className="import-backdrop" aria-label="Fechar" onClick={onClose} />
       <div className="absolute inset-x-0 bottom-0 flex max-h-[92vh] flex-col overflow-hidden rounded-t-[28px] md:inset-0 md:m-auto md:h-fit md:max-h-[88vh] md:max-w-lg md:rounded-[28px]" style={{ background: "var(--kids-fundo)", boxShadow: "var(--kids-sombra-overlay)" }}>
         <div className="flex items-start gap-3 px-5 pb-3 pt-5" style={{ borderBottom: "1px solid var(--kids-borda)" }}>

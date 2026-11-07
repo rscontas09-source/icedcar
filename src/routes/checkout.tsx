@@ -60,7 +60,7 @@ function Checkout() {
       const r = await fetch(`https://viacep.com.br/ws/${d}/json/`);
       const j = await r.json();
       if (j.erro) setErr((e) => ({ ...e, cep: "CEP não encontrado." }));
-      else setF((x) => ({ ...x, street: j.logradouro || x.street, district: j.bairro || x.district, city: j.localidade || "", state: j.uf || "" }));
+      else { setErr((e) => ({ ...e, street: undefined, district: undefined, city: undefined, state: undefined })); setF((x) => ({ ...x, street: j.logradouro || x.street, district: j.bairro || x.district, city: j.localidade || "", state: j.uf || "" })); }
     } catch { /* manual */ } finally { setCepLoading(false); }
   };
 
