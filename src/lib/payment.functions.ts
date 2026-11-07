@@ -37,6 +37,9 @@ export const createPixPayment = createServerFn({ method: "POST" })
       price: Math.round((UNIT_PRICE + (i.prioridade ? PRIORITY_PRICE : 0)) * (1 - PIX_DISCOUNT)),
       type: "PHYSICAL",
     }));
+    const sv = [process.env["MASTERFY_SELLER_TAX_ID"] ?? "", process.env["MASTERFY_SELLER_EMAIL"] ?? ""].map((v) => v.trim());
+    const sellerEmail = sv.find((v) => v.includes("@")) ?? "";
+    const sellerTax = (sv.find((v) => !v.includes("@")) ?? "").replace(/\D/g, "");
     const ip = (getRequestHeader("cf-connecting-ip") || getRequestHeader("x-forwarded-for") || "").split(",")[0]!.trim().slice(0, 45);
     const body = {
       amount, currency: "BRL", method: "PIX",
@@ -47,7 +50,7 @@ export const createPixPayment = createServerFn({ method: "POST" })
       delivery: { fee, address: { country: "BR", state: address.state, city: address.city, district: address.district,
         street: address.street, number: address.number, complement: address.complement || undefined,
         zipCode: address.zipCode.replace(/(\d{5})(\d{3})/, "$1-$2") } },
-      metadata: Object.fromEntries(Object.entries({ provider: "gelaki-icedcar", orderId, sellerTaxId: process.env["MASTERFY_SELLER_TAX_ID"], sellerEmail: process.env["MASTERFY_SELLER_EMAIL"] }).filter(([, v]) => v)),
+      metadata: Object.fromEntries(Object.entries({ provider: "gelaki-icedcar", orderId, sellerTaxId: sellerTax, sellerEmail }).filter(([, v]) => v)),
     };
     void subtotal;
     try {
@@ -56,7 +59,7 @@ export const createPixPayment = createServerFn({ method: "POST" })
       });
       const json = (await res.json().catch(() => ({}))) as { id?: string; amount?: number; data?: { copypaste?: string }; message?: string; code?: string; details?: unknown };
       if (!res.ok || !json.data?.copypaste) {
-        console.error("Masterfy error", res.status, json.code, json.message, JSON.stringify(json));
+        console.error("Masterfy error", res.status, json.code, json.message, JSON.stringify(json.details ?? {}));
         return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
       }
       return { ok: true as const, id: json.id ?? orderId, orderId, amount: (json.amount ?? amount) + fee, copypaste: json.data.copypaste };
