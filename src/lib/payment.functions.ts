@@ -25,7 +25,7 @@ const schema = z.object({
 export const createPixPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => schema.parse(d))
   .handler(async ({ data }) => {
-    const key = process.env.MASTERFY_API_KEY;
+    const key = process.env["MASTERFY_API_KEY"];
     if (!key) return { ok: false as const, error: "Pagamento ainda não configurado na loja." };
     const { order, payer, address } = data;
     const fee = shipping(order);
@@ -37,7 +37,7 @@ export const createPixPayment = createServerFn({ method: "POST" })
       price: Math.round((UNIT_PRICE + (i.prioridade ? PRIORITY_PRICE : 0)) * (1 - PIX_DISCOUNT)),
       type: "PHYSICAL",
     }));
-    const ip = (getRequestHeader("cf-connecting-ip") || getRequestHeader("x-forwarded-for") || "").split(",")[0].trim().slice(0, 45);
+    const ip = (getRequestHeader("cf-connecting-ip") || getRequestHeader("x-forwarded-for") || "").split(",")[0]!.trim().slice(0, 45);
     const body = {
       amount, currency: "BRL", method: "PIX",
       description: `Pedido ${orderId} - Mini Cooler IcedCar`, externalRef: orderId,
@@ -47,8 +47,8 @@ export const createPixPayment = createServerFn({ method: "POST" })
       delivery: { fee, address: { country: "BR", state: address.state, city: address.city, district: address.district,
         street: address.street, number: address.number, complement: address.complement || undefined,
         zipCode: address.zipCode.replace(/(\d{5})(\d{3})/, "$1-$2") } },
-      metadata: { provider: "gelaki-icedcar", orderId, sellerTaxId: process.env.MASTERFY_SELLER_TAX_ID ?? null,
-        sellerEmail: process.env.MASTERFY_SELLER_EMAIL ?? null, checkoutUrl: null, returnUrl: null, shopUrl: null, referrerLink: null,
+      metadata: { provider: "gelaki-icedcar", orderId, sellerTaxId: process.env["MASTERFY_SELLER_TAX_ID"] ?? null,
+        sellerEmail: process.env["MASTERFY_SELLER_EMAIL"] ?? null, checkoutUrl: null, returnUrl: null, shopUrl: null, referrerLink: null,
         extra: JSON.stringify(order.items).slice(0, 2000) },
     };
     void subtotal;
