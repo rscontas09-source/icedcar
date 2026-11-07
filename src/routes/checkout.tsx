@@ -2,13 +2,24 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import capturedCSS from "../styles/site.css?raw";
-import { createPixPayment } from "@/lib/payment.functions";
-import { type Order, ORDER_KEY, brl, cardTotal, isValidCPF, pixTotal, shipping, subtotal, PIX_DISCOUNT } from "@/lib/order";
+import { createPixPayment, createCardPayment, getPaymentStatus, getTokenizationKey } from "@/lib/payment.functions";
+import { type Order, ORDER_KEY, brl, cardTotal, cardSubtotal, isValidCPF, pixTotal, shipping, subtotal, PIX_DISCOUNT, MAX_INSTALLMENTS } from "@/lib/order";
+
+type Card = { number: string; holder: string; expMonth: string; expYear: string; cvv: string };
+type MfTok = { init: (k: string) => Promise<void>; encrypt: (c: Card) => Promise<string> };
+type Mf3DS = { init: (k: string) => Promise<void>; prepare: (s: unknown) => Promise<void>; start: (c: Card) => Promise<Record<string, unknown> | undefined>; finish: (r: unknown) => Promise<void> };
+const loadScript = (src: string) => new Promise<void>((ok, no) => {
+  if (document.querySelector(`script[src="${src}"]`)) return ok();
+  const el = document.createElement("script"); el.type = "module"; el.src = src; el.onload = () => ok(); el.onerror = () => no(new Error("script")); document.head.appendChild(el);
+});
+const waitFor = async <T,>(get: () => T | undefined, ms = 8000) => { const t = Date.now(); while (Date.now() - t < ms) { const v = get(); if (v) return v; await new Promise((r) => setTimeout(r, 100)); } throw new Error("timeout"); };
+const w = () => window as unknown as { MasterFy?: MfTok; MasterFyThreeDS?: Mf3DS };
+const cardErrMsg: Record<string, string> = { INVALID_CARD_NUMBER: "Número do cartão inválido.", INVALID_CARD_HOLDER: "Informe o nome impresso no cartão.", INVALID_EXP_MONTH: "Mês de validade inválido.", INVALID_EXP_YEAR: "Ano de validade inválido.", CARD_EXPIRED: "Cartão vencido.", INVALID_CVV: "CVV inválido.", THREEDS_AUTHENTICATION_FAILED: "A autenticação do banco não foi concluída. Tente novamente." };
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [
     { title: "Finalizar compra - Mini Cooler IcedCar | Gelaki Brasil" },
-    { name: "description", content: "Checkout seguro do seu Mini Cooler IcedCar personalizado. PIX com 5% de desconto." },
+    { name: "description", content: "Checkout seguro do seu Mini Cooler IcedCar personalizado. PIX com 5% de desconto ou até 12x no cartão." },
     { property: "og:title", content: "Checkout seguro | Gelaki Brasil" },
     { property: "og:description", content: "Finalize seu IcedCar personalizado com PIX e 5% de desconto." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
@@ -25,8 +36,10 @@ const mask = {
 };
 const box: CSSProperties = { background: "#fff", border: "1px solid var(--kids-borda)", borderRadius: 22, boxShadow: "var(--kids-sombra-card)" };
 
-type F = Record<"name" | "email" | "phone" | "cpf" | "cep" | "street" | "number" | "complement" | "district" | "city" | "state", string>;
-const initial: F = { name: "", email: "", phone: "", cpf: "", cep: "", street: "", number: "", complement: "", district: "", city: "", state: "" };
+type F = Record<"ccNumber" | "ccHolder" | "ccExp" | "ccCvv" | "name" | "email" | "phone" | "cpf" | "cep" | "street" | "number" | "complement" | "district" | "city" | "state", string>;
+const initial: F = { ccNumber: "", ccHolder: "", ccExp: "", ccCvv: "", name: "", email: "", phone: "", cpf: "", cep: "", street: "", number: "", complement: "", district: "", city: "", state: "" };
+
+function luhn(n: string) { let s = 0; for (let i = 0; i < n.length; i++) { let d = Number(n[n.length - 1 - i]); if (i % 2) { d *= 2; if (d > 9) d -= 9; } s += d; } return s % 10 === 0; }
 
 function Checkout() {
   const [order, setOrder] = useState<Order | null>(null);
@@ -41,6 +54,40 @@ function Checkout() {
   const [pix, setPix] = useState<{ copypaste: string; amount: number; orderId: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const pay = useServerFn(createPixPayment);
+  const payCard = useServerFn(createCardPayment);
+  const checkStatus = useServerFn(getPaymentStatus);
+  const fetchKey = useServerFn(getTokenizationKey);
+  const [method, setMethod] = useState<"pix" | "card">("pix");
+  const [inst, setInst] = useState(1);
+  const [pk, setPk] = useState("");
+  const [cardReady, setCardReady] = useState(false);
+  const [payId, setPayId] = useState("");
+  const [status, setStatus] = useState("");
+  const [cardDone, setCardDone] = useState<{ amount: number; orderId: string } | null>(null);
+
+  // load Masterfy tokenizer + 3DS when card is chosen
+  useEffect(() => {
+    if (method !== "card" || cardReady) return;
+    let off = false;
+    (async () => {
+      try {
+        const k = pk || (await fetchKey()).key; if (!k) throw new Error("nokey"); setPk(k);
+        await loadScript("https://api.masterfypagamentos.com/v1/scripts");
+        await loadScript("https://api.masterfypagamentos.com/v1/scripts/3ds").catch(() => undefined);
+        const tok = await waitFor(() => w().MasterFy); await tok.init(k);
+        const t3 = w().MasterFyThreeDS; if (t3) await t3.init(k).catch(() => undefined);
+        if (!off) setCardReady(true);
+      } catch { if (!off) setPayErr("Pagamento com cartão indisponível no momento. Use o PIX."); }
+    })();
+    return () => { off = true; };
+  }, [method, cardReady, pk, fetchKey]);
+
+  // poll payment status until paid
+  useEffect(() => {
+    if (!payId || status === "PAID") return;
+    const t = setInterval(async () => { try { const r = await checkStatus({ data: { id: payId } }); setStatus(r.status); } catch { /* retry */ } }, 5000);
+    return () => clearInterval(t);
+  }, [payId, status, checkStatus]);
 
   useEffect(() => {
     try { const o = JSON.parse(sessionStorage.getItem(ORDER_KEY) || "null"); if (o?.items?.length) setOrder(o); } catch { /* empty */ }
@@ -76,6 +123,15 @@ function Checkout() {
     if (!f.district.trim()) e.district = "Informe o bairro.";
     if (f.city.trim().length < 2) e.city = "Informe a cidade.";
     if (!/^[A-Za-z]{2}$/.test(f.state)) e.state = "UF";
+    if (method === "card") {
+      const n = f.ccNumber.replace(/\D/g, "");
+      if (!/^\d{13,19}$/.test(n) || !luhn(n)) e.ccNumber = "Número do cartão inválido.";
+      if (f.ccHolder.trim().length < 3) e.ccHolder = "Nome como está no cartão.";
+      const [m, y] = f.ccExp.split("/");
+      const now = new Date(); const yy = 2000 + Number(y);
+      if (!m || !y || y.length !== 2 || Number(m) < 1 || Number(m) > 12 || yy < now.getFullYear() || (yy === now.getFullYear() && Number(m) < now.getMonth() + 1)) e.ccExp = "Validade inválida.";
+      if (!/^\d{3,4}$/.test(f.ccCvv)) e.ccCvv = "CVV inválido.";
+    }
     setErr(e);
     const first = Object.keys(e)[0];
     if (first) document.getElementById(`co-${first}`)?.focus();
@@ -87,16 +143,44 @@ function Checkout() {
     if (!order || !validate()) return;
     setBusy(true); setPayErr("");
     localStorage.setItem("icedcar-buyer", JSON.stringify({ name: f.name, email: f.email, phone: f.phone }));
+    const common = {
+      order,
+      payer: { name: f.name.trim(), email: f.email.trim(), phone: f.phone.replace(/\D/g, ""), taxId: f.cpf.replace(/\D/g, "") },
+      address: { zipCode: f.cep.replace(/\D/g, ""), state: f.state.toUpperCase(), city: f.city.trim(), district: f.district.trim(), street: f.street.trim(), number: f.number.trim(), complement: f.complement.trim() || undefined },
+    };
+    if (method === "pix") {
+      try {
+        const r = await pay({ data: common });
+        if (r.ok) { setPix(r); setPayId(r.id); sessionStorage.removeItem(ORDER_KEY); window.scrollTo({ top: 0, behavior: "smooth" }); }
+        else setPayErr(r.error);
+      } catch { setPayErr("Confira os dados informados e tente novamente."); }
+      finally { setBusy(false); }
+      return;
+    }
+    let created = false;
     try {
-      const r = await pay({ data: {
-        order,
-        payer: { name: f.name.trim(), email: f.email.trim(), phone: f.phone.replace(/\D/g, ""), taxId: f.cpf.replace(/\D/g, "") },
-        address: { zipCode: f.cep.replace(/\D/g, ""), state: f.state.toUpperCase(), city: f.city.trim(), district: f.district.trim(), street: f.street.trim(), number: f.number.trim(), complement: f.complement.trim() || undefined },
-      } });
-      if (r.ok) { setPix(r); sessionStorage.removeItem(ORDER_KEY); window.scrollTo({ top: 0, behavior: "smooth" }); }
-      else setPayErr(r.error);
-    } catch { setPayErr("Confira os dados informados e tente novamente."); }
-    finally { setBusy(false); }
+      const tok = w().MasterFy; if (!cardReady || !tok) throw Object.assign(new Error("x"), { name: "Load" });
+      const [m, y] = f.ccExp.split("/");
+      const card: Card = { number: f.ccNumber.replace(/\D/g, ""), holder: f.ccHolder.trim().toUpperCase(), expMonth: m!.padStart(2, "0"), expYear: "20" + y, cvv: f.ccCvv };
+      const t3 = w().MasterFyThreeDS;
+      let threeDS: Record<string, unknown> | undefined;
+      if (t3) {
+        try {
+          await t3.prepare({ amount: cardSubtotal(order), currency: "BRL", method: "CREDIT_CARD", card: { installments: inst }, payer: { name: common.payer.name, email: common.payer.email, taxId: common.payer.taxId, phone: "+55" + common.payer.phone } });
+          threeDS = (await t3.start(card)) ?? undefined;
+        } catch { threeDS = undefined; }
+      }
+      const token = await tok.encrypt(card);
+      const r = await payCard({ data: { ...common, card: { token, installments: inst, ...(threeDS ? { threeDS } : {}) }, returnUrl: window.location.origin.startsWith("https://") ? window.location.href : undefined } });
+      if (!r.ok) { setPayErr(r.error); return; }
+      created = true;
+      setPayId(r.id); setStatus(r.status); sessionStorage.removeItem(ORDER_KEY);
+      if (t3) await t3.finish(JSON.parse(r.response)).catch(() => undefined);
+      setCardDone({ amount: r.amount, orderId: r.orderId }); window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) {
+      const code = (e as { code?: string; message?: string }).code || (e as Error).message;
+      setPayErr(cardErrMsg[code] ?? "Não foi possível processar o cartão. Confira os dados ou pague no PIX.");
+    } finally { if (!created) setBusy(false); }
   };
 
   const mm = String(Math.floor(secs / 60)).padStart(2, "0"), ss = String(secs % 60).padStart(2, "0");
@@ -125,7 +209,25 @@ function Checkout() {
           <span className="flex items-center gap-1 text-xs font-semibold" style={{ color: "var(--kids-texto-suave)" }}>🔒 Ambiente seguro</span>
         </header>
 
-        {!loaded ? null : pix ? (
+        {!loaded ? null : status === "PAID" ? (
+          <main className="mx-auto max-w-lg px-4 pb-16">
+            <div className="p-6 text-center" style={box}>
+              <p className="text-4xl">✅</p>
+              <h1 className="kids-titulo mt-2 text-2xl">Pagamento confirmado!</h1>
+              <p className="mt-2 text-sm" style={{ color: "var(--kids-texto-suave)" }}>Obrigado! Seu IcedCar personalizado já entrou na fila de produção. Você recebe as atualizações por e-mail e WhatsApp.</p>
+              <Link to="/" className="kids-btn kids-btn-cta mt-5 inline-flex">Voltar à loja</Link>
+            </div>
+          </main>
+        ) : cardDone ? (
+          <main className="mx-auto max-w-lg px-4 pb-16">
+            <div className="p-6 text-center" style={box}>
+              <p className="text-3xl">💳</p>
+              <h1 className="kids-titulo mt-2 text-2xl">{status === "REFUSED" ? "Pagamento recusado" : "Pagamento em análise"}</h1>
+              <p className="mt-2 text-sm" style={{ color: "var(--kids-texto-suave)" }}>{status === "REFUSED" ? "O banco recusou o cartão. Volte e tente outro cartão ou o PIX." : `Pedido ${cardDone.orderId} · ${brl(cardDone.amount)}. Estamos confirmando com o banco, isso leva poucos segundos.`}</p>
+              {status !== "REFUSED" && <p className="mt-4 text-xs font-semibold" style={{ color: "var(--kids-cta)" }}>⏳ Aguardando confirmação…</p>}
+            </div>
+          </main>
+        ) : pix ? (
           <main className="mx-auto max-w-lg px-4 pb-16">
             <div className="p-6 text-center" style={box}>
               <p className="text-3xl">🎉</p>
@@ -140,7 +242,8 @@ function Checkout() {
                 <li>2. Cole o código e confirme o pagamento.</li>
                 <li>3. Pronto! Você recebe a confirmação por e-mail e a produção começa.</li>
               </ol>
-              <p className="mt-4 text-xs font-semibold" style={{ color: "var(--kids-sale)" }}>⏱ O código expira em breve — pague agora para garantir o preço.</p>
+              <p className="mt-3 text-xs font-semibold" style={{ color: "var(--kids-cta)" }}>⏳ Aguardando pagamento… esta tela atualiza sozinha quando o PIX cair.</p>
+              <p className="mt-2 text-xs font-semibold" style={{ color: "var(--kids-sale)" }}>⏱ O código expira em breve — pague agora para garantir o preço.</p>
             </div>
           </main>
         ) : !order ? (
@@ -185,12 +288,31 @@ function Checkout() {
               </section>
               <section className="p-5" style={box}>
                 <h2 className="kids-titulo mb-4 text-lg">3. Pagamento</h2>
-                <div className="rounded-2xl p-4" style={{ border: "2px solid var(--kids-rosa)", background: "var(--kids-rosa-suave)" }}>
-                  <div className="flex items-center justify-between"><span className="font-bold">◉ PIX</span><span className="kids-selo" style={{ background: "var(--kids-cta)", color: "#fff" }}>{Math.round(PIX_DISCOUNT * 100)}% OFF</span></div>
-                  <p className="mt-1 text-xs" style={{ color: "var(--kids-texto-suave)" }}>Aprovação imediata. O QR Code aparece logo após finalizar.</p>
-                </div>
+                {(["pix", "card"] as const).map((m) => (
+                  <button key={m} type="button" aria-pressed={method === m} onClick={() => { setMethod(m); setPayErr(""); }} className="mb-3 block w-full rounded-2xl p-4 text-left"
+                    style={{ border: `2px solid ${method === m ? "var(--kids-rosa)" : "var(--kids-borda)"}`, background: method === m ? "var(--kids-rosa-suave)" : "#fff" }}>
+                    <div className="flex items-center justify-between"><span className="font-bold">{method === m ? "◉" : "○"} {m === "pix" ? "PIX" : "Cartão de crédito"}</span>
+                      {m === "pix" ? <span className="kids-selo" style={{ background: "var(--kids-cta)", color: "#fff" }}>{Math.round(PIX_DISCOUNT * 100)}% OFF · {brl(pixTotal(order))}</span> : <span className="text-xs font-bold">{brl(cardTotal(order))} em até {MAX_INSTALLMENTS}x</span>}</div>
+                    <p className="mt-1 text-xs" style={{ color: "var(--kids-texto-suave)" }}>{m === "pix" ? "Aprovação imediata. O QR Code aparece logo após finalizar." : `Até ${MAX_INSTALLMENTS}x de ${brl(Math.ceil(cardTotal(order) / MAX_INSTALLMENTS))} sem juros.`}</p>
+                  </button>
+                ))}
+                {method === "card" && (
+                  <div className="grid grid-cols-6 gap-3">
+                    {field("ccNumber", "Número do cartão", { inputMode: "numeric", autoComplete: "cc-number", className: "col-span-6", fmt: (v) => v.replace(/\D/g, "").slice(0, 19).replace(/(\d{4})(?=\d)/g, "$1 "), placeholder: "0000 0000 0000 0000" })}
+                    {field("ccHolder", "Nome impresso no cartão", { autoComplete: "cc-name", className: "col-span-6", maxLength: 60, fmt: (v) => v.toUpperCase() })}
+                    {field("ccExp", "Validade", { inputMode: "numeric", autoComplete: "cc-exp", className: "col-span-3", placeholder: "MM/AA", fmt: (v) => v.replace(/\D/g, "").slice(0, 4).replace(/(\d{2})(\d)/, "$1/$2") })}
+                    {field("ccCvv", "CVV", { inputMode: "numeric", autoComplete: "cc-csc", className: "col-span-3", placeholder: "123", fmt: (v) => v.replace(/\D/g, "").slice(0, 4) })}
+                    <div className="col-span-6">
+                      <label htmlFor="co-inst" className="mb-1 block text-xs font-bold">Parcelas</label>
+                      <select id="co-inst" value={inst} onChange={(e) => setInst(Number(e.target.value))} className="h-12 w-full rounded-xl px-3 text-base md:text-sm" style={{ border: "1px solid var(--kids-borda)", background: "#fff" }}>
+                        {Array.from({ length: MAX_INSTALLMENTS }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}x de {brl(Math.ceil(cardTotal(order) / n))} sem juros</option>)}
+                      </select>
+                    </div>
+                    {!cardReady && !payErr && <p className="col-span-6 text-xs" style={{ color: "var(--kids-texto-suave)" }}>Carregando pagamento seguro…</p>}
+                  </div>
+                )}
                 {payErr && <p role="alert" className="mt-3 rounded-xl px-3 py-2 text-sm font-semibold" style={{ background: "var(--kids-sale-suave)", color: "var(--kids-sale)" }}>{payErr}</p>}
-                <button type="submit" disabled={busy} className="kids-btn kids-btn-cta mt-4 w-full disabled:opacity-60">{busy ? "Gerando PIX…" : `Finalizar pedido · ${brl(pixTotal(order))}`}</button>
+                <button type="submit" disabled={busy} className="kids-btn kids-btn-cta mt-4 w-full disabled:opacity-60">{busy ? (method === "pix" ? "Gerando PIX…" : "Processando cartão…") : method === "pix" ? `Pagar com PIX · ${brl(pixTotal(order))}` : `Pagar ${inst}x de ${brl(Math.ceil(cardTotal(order) / inst))}`}</button>
                 <ul className="mt-4 grid grid-cols-2 gap-2 text-[11px] font-semibold" style={{ color: "var(--kids-texto-suave)" }}>
                   <li>🔒 Dados criptografados</li><li>🧾 Nota fiscal eletrônica</li><li>↩️ 7 dias para troca</li><li>✅ +10 mil clientes</li>
                 </ul>
@@ -213,10 +335,11 @@ function Checkout() {
                 <Link to="/" className="block text-xs font-semibold underline" style={{ color: "var(--kids-rosa-texto)" }}>Editar personalização</Link>
                 <dl className="space-y-1 pt-2 text-sm" style={{ borderTop: "1px solid var(--kids-borda)" }}>
                   <div className="flex justify-between"><dt>Subtotal</dt><dd>{brl(subtotal(order))}</dd></div>
-                  <div className="flex justify-between" style={{ color: "var(--kids-cta)" }}><dt>Desconto PIX (5%)</dt><dd>−{brl(subtotal(order) - Math.round(subtotal(order) * (1 - PIX_DISCOUNT)))}</dd></div>
+                  {method === "card" ? <div className="flex justify-between"><dt>Preço no cartão</dt><dd>{brl(cardSubtotal(order))}</dd></div> : null}
+                  {method === "pix" && <div className="flex justify-between" style={{ color: "var(--kids-cta)" }}><dt>Desconto PIX (5%)</dt><dd>−{brl(subtotal(order) - Math.round(subtotal(order) * (1 - PIX_DISCOUNT)))}</dd></div>}
                   <div className="flex justify-between"><dt>Frete</dt><dd>{shipping(order) ? brl(shipping(order)) : "Grátis"}</dd></div>
-                  <div className="flex justify-between pt-2 text-lg font-bold"><dt>Total no PIX</dt><dd style={{ color: "var(--kids-cta)" }}>{brl(pixTotal(order))}</dd></div>
-                  <p className="text-right text-[11px] line-through" style={{ color: "var(--kids-texto-suave)" }}>De {brl(Math.round(cardTotal(order) * 99.9 / 79))}</p>
+                  <div className="flex justify-between pt-2 text-lg font-bold"><dt>{method === "pix" ? "Total no PIX" : "Total no cartão"}</dt><dd style={{ color: "var(--kids-cta)" }}>{brl(method === "pix" ? pixTotal(order) : cardTotal(order))}</dd></div>
+                  {method === "pix" && <p className="text-right text-[11px] line-through" style={{ color: "var(--kids-texto-suave)" }}>No cartão {brl(cardTotal(order))}</p>}
                 </dl>
                 <div className="rounded-2xl p-3 text-xs" style={{ background: "var(--kids-fundo-suave)" }}>
                   <p>⭐⭐⭐⭐⭐ “Ficou idêntico ao meu carro, presente perfeito!”</p>
