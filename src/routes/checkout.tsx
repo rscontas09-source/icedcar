@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import capturedCSS from "../styles/site.css?raw";
 import { createPixPayment, createCardPayment, getPaymentStatus, getTokenizationKey } from "@/lib/payment.functions";
 import { type Order, ORDER_KEY, brl, cardTotal, cardSubtotal, isValidCPF, pixTotal, shipping, subtotal, PIX_DISCOUNT, MAX_INSTALLMENTS } from "@/lib/order";
+import { reportConfirmedPurchase } from "@/lib/advertising";
 
 type Card = { number: string; holder: string; expMonth: string; expYear: string; cvv: string };
 type MfTok = { init: (k: string) => Promise<void>; encrypt: (c: Card) => Promise<string> };
@@ -64,6 +65,10 @@ function Checkout() {
   const [payId, setPayId] = useState("");
   const [status, setStatus] = useState("");
   const [cardDone, setCardDone] = useState<{ amount: number; orderId: string } | null>(null);
+  useEffect(() => {
+    const payment = pix ?? cardDone;
+    if (payment) reportConfirmedPurchase(status, payment.amount, payId);
+  }, [status, pix, cardDone, payId]);
 
   // load Masterfy tokenizer + 3DS when card is chosen
   useEffect(() => {
@@ -161,7 +166,8 @@ function Checkout() {
     try {
       const tok = w().MasterFy; if (!cardReady || !tok) throw Object.assign(new Error("x"), { name: "Load" });
       const [m, y] = f.ccExp.split("/");
-      const card: Card = { number: f.ccNumber.replace(/\D/g, ""), holder: f.ccHolder.trim().toUpperCase(), expMonth: m!.padStart(2, "0"), expYear: "20" + y, cvv: f.ccCvv };
+      if (!m || !y) throw new Error("Validade inválida");
+      const card: Card = { number: f.ccNumber.replace(/\D/g, ""), holder: f.ccHolder.trim().toUpperCase(), expMonth: m.padStart(2, "0"), expYear: "20" + y, cvv: f.ccCvv };
       const t3 = w().MasterFyThreeDS;
       let threeDS: Record<string, unknown> | undefined;
       if (t3) {
