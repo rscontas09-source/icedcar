@@ -56,9 +56,9 @@ export const createPixPayment = createServerFn({ method: "POST" })
       const res = await fetch("https://api.masterfypagamentos.com/v1/payment", {
         method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
       });
-      const json = (await res.json().catch(() => ({}))) as { id?: string; amount?: number; data?: { copypaste?: string }; message?: string; code?: string };
+      const json = (await res.json().catch(() => ({}))) as { id?: string; amount?: number; data?: { copypaste?: string }; message?: string; code?: string; details?: unknown };
       if (!res.ok || !json.data?.copypaste) {
-        console.error("Masterfy error", res.status, json.code, json.message);
+        console.error("Masterfy error", res.status, json.code, json.message, JSON.stringify(json.details));
         return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
       }
       return { ok: true as const, id: json.id ?? orderId, orderId, amount: (json.amount ?? amount) + fee, copypaste: json.data.copypaste };
