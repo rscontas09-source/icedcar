@@ -175,7 +175,7 @@ function Checkout() {
       if (!r.ok) { setPayErr(r.error); return; }
       created = true;
       setPayId(r.id); setStatus(r.status); sessionStorage.removeItem(ORDER_KEY);
-      if (t3) await t3.finish(r.response).catch(() => undefined);
+      if (t3) await t3.finish(JSON.parse(r.response)).catch(() => undefined);
       setCardDone({ amount: r.amount, orderId: r.orderId }); window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       const code = (e as { code?: string; message?: string }).code || (e as Error).message;

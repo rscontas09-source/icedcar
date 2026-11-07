@@ -114,7 +114,7 @@ export const createCardPayment = createServerFn({ method: "POST" })
       }
       if (json.status === "REFUSED") return { ok: false as const, error: "Cartão recusado pelo banco. Tente outro cartão ou pague no PIX." };
       // the whole response goes back so the 3DS SDK finish() can use it
-      return { ok: true as const, id: json.id, orderId, status: json.status ?? "PROCESSING", amount: (json.amount ?? amount) + fee, response: JSON.parse(JSON.stringify(json)) as Record<string, unknown> };
+      return { ok: true as const, id: json.id, orderId, status: json.status ?? "PROCESSING", amount: (json.amount ?? amount) + fee, response: JSON.stringify(json) };
     } catch (e) {
       console.error("Masterfy card fetch failed", e);
       return { ok: false as const, error: "Falha de conexão com o pagamento. Tente novamente." };
