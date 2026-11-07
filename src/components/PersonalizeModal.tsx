@@ -33,7 +33,7 @@ const sel = (on: boolean): CSSProperties => on
   ? { border: "2px solid var(--kids-rosa)", color: "var(--kids-rosa-texto)", background: "var(--kids-rosa-suave)" }
   : { border: "2px solid var(--kids-borda)", color: "var(--kids-texto)", background: "#fff" };
 
-function Combo({ id, label, value, options, onChange, placeholder, error, inputMode }: { id: string; label: string; value: string; options: string[]; onChange: (v: string) => void; placeholder: string; error?: string; inputMode?: "numeric" }) {
+function Combo({ id, label, value, options, onChange, placeholder, error, inputMode }: { id: string; label: string; value: string; options: string[]; onChange: (v: string) => void; placeholder: string; error?: string | undefined; inputMode?: "numeric" }) {
   const [open, setOpen] = useState(false);
   const list = options.filter((o) => o.toLowerCase().includes(value.toLowerCase())).slice(0, 8);
   return (
@@ -64,11 +64,11 @@ export function PersonalizeModal({ quantity, onClose }: { quantity: number; onCl
 
   const validate = (c: Customization) => {
     const e: Record<string, string> = {};
-    if (!c.marca.trim()) e.marca = "Informe a marca do carro.";
-    if (!c.modelo.trim()) e.modelo = "Informe o modelo do carro.";
-    if (!/^\d{4}$/.test(c.ano) || +c.ano < 1950 || +c.ano > 2027) e.ano = "Informe um ano válido (ex.: 2022).";
-    if (!c.cor) e.cor = "Escolha a cor do carro.";
-    if (!c.placa.trim()) e.placa = "Digite o nome da placa.";
+    if (!c.marca.trim()) e["marca"] = "Informe a marca do carro.";
+    if (!c.modelo.trim()) e["modelo"] = "Informe o modelo do carro.";
+    if (!/^\d{4}$/.test(c.ano) || +c.ano < 1950 || +c.ano > 2027) e["ano"] = "Informe um ano válido (ex.: 2022).";
+    if (!c.cor) e["cor"] = "Escolha a cor do carro.";
+    if (!c.placa.trim()) e["placa"] = "Digite o nome da placa.";
     return e;
   };
 
