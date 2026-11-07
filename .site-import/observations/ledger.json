@@ -8,8 +8,8 @@
     "control": "Buscar produtos",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Buscar-produtos.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -32,8 +32,8 @@
     "control": "Ampliar imagem",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Ampliar-imagem.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -44,8 +44,8 @@
     "control": "Ver imagem 2",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Ver-imagem-2.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -80,8 +80,9 @@
     "control": "Personalizar",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Personalizar.png",
-    "status": "failed",
-    "reason": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"radio\", name=\"Frente\", exact=True)\n"
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -92,8 +93,9 @@
     "control": "Comprar agora",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Comprar-agora.png",
-    "status": "failed",
-    "reason": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"radio\", name=\"Frente\", exact=True)\n"
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -104,8 +106,8 @@
     "control": "Envio e prazo",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Envio-e-prazo.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 1236
   },
   {
     "route": "/",
@@ -116,8 +118,8 @@
     "control": "Vem com nota fiscal?",
     "layout": "desktop",
     "screenshot": ".site-import/observations/preview-desktop-Vem-com-nota-fiscal.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 2481
   },
   {
     "route": "/",
@@ -140,8 +142,8 @@
     "control": "Buscar produtos",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Buscar-produtos.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -164,8 +166,8 @@
     "control": "Ampliar imagem",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Ampliar-imagem.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -176,8 +178,8 @@
     "control": "Ver imagem 2",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Ver-imagem-2.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 0
   },
   {
     "route": "/",
@@ -188,8 +190,8 @@
     "control": "formas de pagamento",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-formas-de-pagamento.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 462
   },
   {
     "route": "/",
@@ -201,7 +203,7 @@
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-2-unidades.png",
     "status": "passed",
-    "scroll": 0
+    "scroll": 462
   },
   {
     "route": "/",
@@ -212,8 +214,9 @@
     "control": "Personalizar",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Personalizar.png",
-    "status": "failed",
-    "reason": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"radio\", name=\"Frente\", exact=True)\n"
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 462
   },
   {
     "route": "/",
@@ -224,8 +227,9 @@
     "control": "Comprar agora",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Comprar-agora.png",
-    "status": "failed",
-    "reason": "Locator.click: Timeout 30000ms exceeded.\nCall log:\n  - waiting for get_by_role(\"radio\", name=\"Frente\", exact=True)\n"
+    "nextStep": "Frente and Picape selected; brand field visible; submission not connected",
+    "status": "partial",
+    "scroll": 462
   },
   {
     "route": "/",
@@ -236,8 +240,8 @@
     "control": "Envio e prazo",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Envio-e-prazo.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 2608
   },
   {
     "route": "/",
@@ -248,7 +252,7 @@
     "control": "Vem com nota fiscal?",
     "layout": "phone",
     "screenshot": ".site-import/observations/preview-phone-Vem-com-nota-fiscal.png",
-    "status": "failed",
-    "reason": ""
+    "status": "passed",
+    "scroll": 4280
   }
 ]
