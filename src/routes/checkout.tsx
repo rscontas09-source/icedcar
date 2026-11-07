@@ -32,7 +32,7 @@ function Checkout() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [f, setF] = useState<F>(initial);
-  const [err, setErr] = useState<Partial<Record<keyof F, string>>>({});
+  const [err, setErr] = useState<Partial<Record<keyof F, string | undefined>>>({});
   const [cepLoading, setCepLoading] = useState(false);
   const [secs, setSecs] = useState(15 * 60);
   const [viewers] = useState(() => 9 + Math.floor(Math.random() * 14));
@@ -65,7 +65,7 @@ function Checkout() {
   };
 
   const validate = () => {
-    const e: Partial<Record<keyof F, string>> = {};
+    const e: Partial<Record<keyof F, string | undefined>> = {};
     if (f.name.trim().split(/\s+/).length < 2 || f.name.trim().length < 5) e.name = "Digite nome e sobrenome.";
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email.trim())) e.email = "E-mail inválido.";
     if (!/^\d{10,11}$/.test(f.phone.replace(/\D/g, ""))) e.phone = "Celular com DDD inválido.";
