@@ -6,7 +6,7 @@ export async function connectpay(path: string, init: { method?: string; body?: u
   const res = await fetch(BASE + path, {
     method: init.method ?? "GET",
     headers: { "api-secret": secret, "Content-Type": "application/json" },
-    body: init.body ? JSON.stringify(init.body) : undefined,
+    body: init.body ? JSON.stringify(init.body) : null,
   });
   const json = (await res.json().catch(() => ({}))) as Record<string, unknown>;
   if (!res.ok || json["hasError"]) {
