@@ -81,19 +81,19 @@ async function post(key: string, body: unknown) {
 export const createPixPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => base.parse(d))
   .handler(async ({ data }) => {
-    const key = process.env["MASTERFY_API_KEY"];
-    if (!key) return { ok: false as const, error: "Pagamento ainda não configurado na loja." };
+    const { xpag, parseXpagCharge } = await import("./xpag.server");
     const { body, fee, amount, orderId } = buildBody(data, "PIX");
+    const total = amount + fee;
     try {
-      const { res, json } = await post(key, body);
-      if (!res.ok || !json.data?.copypaste) {
-        console.error("Masterfy error", res.status, json.code, json.message, JSON.stringify(json.details ?? {}));
-        return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
-      }
-      return { ok: true as const, id: json.id ?? orderId, orderId, amount: (json.amount ?? amount) + fee, copypaste: json.data.copypaste };
+      const r = await xpag("/cashin", { appKey: process.env["LOVABLE_API_KEY"], connectionKey: process.env["UDC_XPAG_API_KEY"] }, {
+        amount: total / 100, currency: "BRL", name: data.payer.name, document: data.payer.taxId.replace(/\D/g, ""),
+        description: body.description, external_id: orderId,
+      });
+      const charge = parseXpagCharge(r);
+      return { ok: true as const, id: "xp_" + charge.id, orderId, amount: total, copypaste: charge.code };
     } catch (e) {
-      console.error("Masterfy fetch failed", e);
-      return { ok: false as const, error: "Falha de conexão com o pagamento. Tente novamente." };
+      console.error("XPag pix failed", e);
+      return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
     }
   });
 
@@ -122,8 +122,17 @@ export const createCardPayment = createServerFn({ method: "POST" })
   });
 
 export const getPaymentStatus = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ id: z.string().regex(/^[a-z0-9]{10,40}$/) }).parse(d))
+  .inputValidator((d: unknown) => z.object({ id: z.string().regex(/^(xp_[A-Za-z0-9_-]{1,160}|[a-z0-9]{10,40})$/), amount: z.number().int().positive().optional() }).parse(d))
   .handler(async ({ data }) => {
+    if (data.id.startsWith("xp_")) {
+      const tx = data.id.slice(3);
+      try {
+        const { xpag, verifiedXpagStatus } = await import("./xpag.server");
+        const r = await xpag(`/consult-transaction?transaction_id=${encodeURIComponent(tx)}`, { appKey: process.env["LOVABLE_API_KEY"], connectionKey: process.env["UDC_XPAG_API_KEY"] });
+        const st = verifiedXpagStatus(r, tx, (data.amount ?? 0) / 100);
+        return { status: st === "paid" ? "PAID" : st === "failed" ? "REFUSED" : "PENDING" };
+      } catch { return { status: "UNKNOWN" }; }
+    }
     const key = process.env["MASTERFY_API_KEY"];
     if (!key) return { status: "UNKNOWN" };
     try {
