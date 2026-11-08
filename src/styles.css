@@ -234,3 +234,6 @@
 .import-close { position:absolute; top:16px; right:16px; width:44px; height:44px; font-size:28px; background:var(--kids-fundo-suave); border-radius:50%; }
 .import-validation { position:absolute; bottom:90px; left:50%; transform:translateX(-50%); background:var(--kids-sale-suave); color:var(--kids-sale); padding:8px 16px; z-index:80; }
 button[aria-pressed="true"], button[role="radio"][aria-checked="true"] { border-color:var(--kids-rosa); }
+
+/* Oculta o selo "Edit with Lovable". */
+#lovable-badge { display: none !important; }
