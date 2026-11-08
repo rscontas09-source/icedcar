@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as ApiPublicConnectpayWebhookRouteImport } from './routes/api/public/connectpay-webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,51 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicConnectpayWebhookRoute =
+  ApiPublicConnectpayWebhookRouteImport.update({
+    id: '/api/public/connectpay-webhook',
+    path: '/api/public/connectpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/checkout' | '/privacidade'
+  fullPaths:
+    '/' | '/checkout' | '/privacidade' | '/api/public/connectpay-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/checkout' | '/privacidade'
-  id: '__root__' | '/' | '/checkout' | '/privacidade'
+  to: '/' | '/checkout' | '/privacidade' | '/api/public/connectpay-webhook'
+  id:
+    | '__root__'
+    | '/'
+    | '/checkout'
+    | '/privacidade'
+    | '/api/public/connectpay-webhook'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CheckoutRoute: typeof CheckoutRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  ApiPublicConnectpayWebhookRoute: typeof ApiPublicConnectpayWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +99,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/connectpay-webhook': {
+      id: '/api/public/connectpay-webhook'
+      path: '/api/public/connectpay-webhook'
+      fullPath: '/api/public/connectpay-webhook'
+      preLoaderRoute: typeof ApiPublicConnectpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +113,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CheckoutRoute: CheckoutRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  ApiPublicConnectpayWebhookRoute: ApiPublicConnectpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -81,18 +81,24 @@ async function post(key: string, body: unknown) {
 export const createPixPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => base.parse(d))
   .handler(async ({ data }) => {
-    const { xpag, parseXpagCharge } = await import("./xpag.server");
+    const { connectpay } = await import("./connectpay.server");
     const { body, fee, amount, orderId } = buildBody(data, "PIX");
     const total = amount + fee;
     try {
-      const r = await xpag("/cashin", { appKey: process.env["LOVABLE_API_KEY"], connectionKey: process.env["UDC_XPAG_API_KEY"] }, {
-        amount: total / 100, currency: "BRL", name: data.payer.name, document: data.payer.taxId.replace(/\D/g, ""),
-        description: body.description, external_id: orderId,
-      });
-      const charge = parseXpagCharge(r);
-      return { ok: true as const, id: "xp_" + charge.id, orderId, amount: total, copypaste: charge.code };
+      const items = body.items.map((i, n) => ({ id: `item_${n + 1}`, title: i.name, description: "Mini cooler personalizado", price: i.price / 100, quantity: 1, is_physical: true }));
+      if (fee > 0) items.push({ id: "frete", title: "Frete", description: "Entrega", price: fee / 100, quantity: 1, is_physical: true });
+      const ip = /^\d{1,3}(\.\d{1,3}){3}$|:/.test(body.ip ?? "") ? body.ip! : "177.0.0.1";
+      const r = await connectpay("/transactions", { method: "POST", body: {
+        external_id: orderId, total_amount: total / 100, payment_method: "PIX", items, ip,
+        webhook_url: "https://icedcar.lovable.app/api/public/connectpay-webhook",
+        customer: { name: data.payer.name, email: data.payer.email, phone: data.payer.phone, document_type: "CPF", document: data.payer.taxId.replace(/\D/g, "") },
+      } });
+      const id = String(r["id"] ?? "");
+      const code = String((r["pix"] as { payload?: string } | undefined)?.payload ?? "");
+      if (!id || !code) throw new Error("missing pix");
+      return { ok: true as const, id: "cp_" + id, orderId, amount: total, copypaste: code };
     } catch (e) {
-      console.error("XPag pix failed", e);
+      console.error("ConnectPay pix failed", e);
       return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
     }
   });
@@ -122,8 +128,17 @@ export const createCardPayment = createServerFn({ method: "POST" })
   });
 
 export const getPaymentStatus = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => z.object({ id: z.string().regex(/^(xp_[A-Za-z0-9_-]{1,160}|[a-z0-9]{10,40})$/), amount: z.number().int().positive().optional() }).parse(d))
+  .inputValidator((d: unknown) => z.object({ id: z.string().regex(/^(xp_[A-Za-z0-9_-]{1,160}|cp_[A-Fa-f0-9-]{36}|[a-z0-9]{10,40})$/), amount: z.number().int().positive().optional() }).parse(d))
   .handler(async ({ data }) => {
+    if (data.id.startsWith("cp_")) {
+      const tx = data.id.slice(3);
+      try {
+        const { connectpay, verifiedConnectpayStatus } = await import("./connectpay.server");
+        const r = await connectpay(`/transactions/${encodeURIComponent(tx)}`);
+        const st = verifiedConnectpayStatus(r, tx, (data.amount ?? 0) / 100);
+        return { status: st === "paid" ? "PAID" : st === "failed" ? "REFUSED" : "PENDING" };
+      } catch { return { status: "UNKNOWN" }; }
+    }
     if (data.id.startsWith("xp_")) {
       const tx = data.id.slice(3);
       try {
