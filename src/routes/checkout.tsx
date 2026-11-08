@@ -267,6 +267,24 @@ function Checkout() {
               <span className="text-xs font-semibold">🔥 {viewers} pessoas vendo este produto agora · restam poucas unidades</span>
             </div>
 
+            <details className="md:hidden overflow-hidden" style={box}>
+              <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
+                <img src="/site-assets/1570458ae2415f83.webp" alt="" className="h-12 w-12 flex-shrink-0 rounded-xl object-contain" style={{ background: "var(--kids-fundo-suave)" }} />
+                <span className="min-w-0 flex-1 text-sm font-bold">Ver resumo do pedido ▾<span className="block truncate text-xs font-normal" style={{ color: "var(--kids-texto-suave)" }}>{order.items.length}x IcedCar · placa “{order.items[0]?.placa}”</span></span>
+                <span className="text-base font-bold" style={{ color: "var(--kids-cta)" }}>{brl(method === "pix" ? pixTotal(order) : cardTotal(order))}</span>
+              </summary>
+              <div className="space-y-2 px-4 pb-4 text-xs">
+                {order.items.map((i, n) => (
+                  <div key={n} className="rounded-xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
+                    <p className="font-bold">Mini Cooler IcedCar 45L</p>
+                    <p style={{ color: "var(--kids-texto-suave)" }}>{i.marca} {i.modelo} {i.ano} · {i.cor} · {i.lado}</p>
+                    <p className="font-bold">Placa: “{i.placa}”{i.prioridade ? " · ⚡ Prioridade" : ""}</p>
+                  </div>
+                ))}
+                <div className="flex justify-between text-sm"><span>Frete</span><span>{shipping(order) ? brl(shipping(order)) : "Grátis"}</span></div>
+              </div>
+            </details>
+
             <form onSubmit={submit} noValidate className="space-y-5 md:order-1">
               <section className="p-5" style={box}>
                 <h2 className="kids-titulo mb-4 text-lg">1. Seus dados</h2>
@@ -325,7 +343,7 @@ function Checkout() {
               </section>
             </form>
 
-            <aside className="md:order-2">
+            <aside className="hidden md:order-2 md:block">
               <div className="space-y-3 p-5 md:sticky md:top-4" style={box}>
                 <h2 className="kids-titulo text-lg">Resumo do pedido</h2>
                 {order.items.map((i, n) => (
