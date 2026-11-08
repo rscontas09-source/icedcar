@@ -90,9 +90,9 @@ function Checkout() {
   // poll payment status until paid
   useEffect(() => {
     if (!payId || status === "PAID") return;
-    const t = setInterval(async () => { try { const r = await checkStatus({ data: { id: payId } }); setStatus(r.status); } catch { /* retry */ } }, 5000);
+    const t = setInterval(async () => { try { const r = await checkStatus({ data: { id: payId, ...(pix ? { amount: pix.amount } : {}) } }); setStatus(r.status); } catch { /* retry */ } }, 5000);
     return () => clearInterval(t);
-  }, [payId, status, checkStatus]);
+  }, [payId, status, checkStatus, pix]);
 
   useEffect(() => {
     try { const o = JSON.parse(sessionStorage.getItem(ORDER_KEY) || "null"); if (o?.items?.length) setOrder(o); } catch { /* empty */ }
