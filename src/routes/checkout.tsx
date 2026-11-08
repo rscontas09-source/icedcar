@@ -35,7 +35,7 @@ const mask = {
   phone: (v: string) => v.replace(/\D/g, "").slice(0, 11).replace(/^(\d{2})(\d)/, "($1) $2").replace(/(\d{5})(\d{1,4})$/, "$1-$2"),
   cep: (v: string) => v.replace(/\D/g, "").slice(0, 8).replace(/(\d{5})(\d)/, "$1-$2"),
 };
-const box: CSSProperties = { background: "#fff", border: "1px solid var(--kids-borda)", borderRadius: 22, boxShadow: "var(--kids-sombra-card)" };
+const box: CSSProperties = { padding: 20, background: "#fff", border: "1px solid var(--kids-borda)", borderRadius: 22, boxShadow: "var(--kids-sombra-card)" };
 
 type F = Record<"ccNumber" | "ccHolder" | "ccExp" | "ccCvv" | "name" | "email" | "phone" | "cpf" | "cep" | "street" | "number" | "complement" | "district" | "city" | "state", string>;
 const initial: F = { ccNumber: "", ccHolder: "", ccExp: "", ccCvv: "", name: "", email: "", phone: "", cpf: "", cep: "", street: "", number: "", complement: "", district: "", city: "", state: "" };
@@ -267,7 +267,7 @@ function Checkout() {
               <span className="text-xs font-semibold">🔥 {viewers} pessoas vendo este produto agora · restam poucas unidades</span>
             </div>
 
-            <details className="md:hidden overflow-hidden" style={box}>
+            <details className="md:hidden overflow-hidden" style={{ ...box, padding: 0 }}>
               <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
                 <img src="/site-assets/1570458ae2415f83.webp" alt="" className="h-12 w-12 flex-shrink-0 rounded-xl object-contain" style={{ background: "var(--kids-fundo-suave)" }} />
                 <span className="min-w-0 flex-1 text-sm font-bold">Ver resumo do pedido ▾<span className="block truncate text-xs font-normal" style={{ color: "var(--kids-texto-suave)" }}>{order.items.length}x IcedCar · placa “{order.items[0]?.placa}”</span></span>

@@ -17,7 +17,7 @@ export function CartDrawer({ onClose, onPersonalize }: { onClose: () => void; on
     setOrder(next);
   };
   return (
-    <div className="import-overlay">
+    <div className="import-overlay" data-theme="kids">
       <button className="import-backdrop" aria-label="Fechar carrinho" onClick={onClose} />
       <aside role="dialog" aria-modal="true" aria-label="Carrinho" className="absolute inset-y-0 right-0 flex w-[92%] max-w-[420px] flex-col" style={{ background: "var(--kids-fundo)", boxShadow: "var(--kids-sombra-overlay)" }}>
         <header className="flex items-center justify-between px-5 py-4" style={{ borderBottom: "1px solid var(--kids-borda)" }}>
