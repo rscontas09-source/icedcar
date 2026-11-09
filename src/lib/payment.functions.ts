@@ -81,24 +81,19 @@ async function post(key: string, body: unknown) {
 export const createPixPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => base.parse(d))
   .handler(async ({ data }) => {
-    const { connectpay } = await import("./connectpay.server");
-    const { body, fee, amount, orderId } = buildBody(data, "PIX");
+    const { xpag, parseXpagCharge } = await import("./xpag.server");
+    const { fee, amount, orderId } = buildBody(data, "PIX");
     const total = amount + fee;
     try {
-      const items = body.items.map((i, n) => ({ id: `item_${n + 1}`, title: i.name, description: "Mini cooler personalizado", price: i.price / 100, quantity: 1, is_physical: true }));
-      if (fee > 0) items.push({ id: "frete", title: "Frete", description: "Entrega", price: fee / 100, quantity: 1, is_physical: true });
-      const ip = /^\d{1,3}(\.\d{1,3}){3}$|:/.test(body.ip ?? "") ? body.ip! : "177.0.0.1";
-      const r = await connectpay("/transactions", { method: "POST", body: {
-        external_id: orderId, total_amount: total / 100, payment_method: "PIX", items, ip,
+      const r = await xpag("/cashin", { appKey: process.env["LOVABLE_API_KEY"], connectionKey: process.env["UDC_XPAG_API_KEY"] }, {
+        amount: total / 100, currency: "BRL", name: data.payer.name, document: data.payer.taxId.replace(/\D/g, ""),
+        description: `Pedido ${orderId} - Mini Cooler IcedCar`, external_id: orderId,
         webhook_url: "https://icedcar.lovable.app/api/public/connectpay-webhook",
-        customer: { name: data.payer.name, email: data.payer.email, phone: data.payer.phone, document_type: "CPF", document: data.payer.taxId.replace(/\D/g, "") },
-      } });
-      const id = String(r["id"] ?? "");
-      const code = String((r["pix"] as { payload?: string } | undefined)?.payload ?? "");
-      if (!id || !code) throw new Error("missing pix");
-      return { ok: true as const, id: "cp_" + id, orderId, amount: total, copypaste: code };
+      });
+      const charge = parseXpagCharge(r);
+      return { ok: true as const, id: "xp_" + charge.id, orderId, amount: total, copypaste: charge.code };
     } catch (e) {
-      console.error("ConnectPay pix failed", e);
+      console.error("XPag pix failed", e);
       return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
     }
   });
