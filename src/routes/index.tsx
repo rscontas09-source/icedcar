@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import capturedCSS from "../styles/site.css?raw";
 import { PersonalizeModal } from "@/components/PersonalizeModal";
 import { CartDrawer, readOrder } from "@/components/CartDrawer";
+import { captureUtms } from "@/lib/tracking";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -23,6 +24,7 @@ function Index() {
   const [panel, setPanel] = useState<string | null>(null);
   const [cartCount, setCartCount] = useState(0);
   useEffect(() => { setCartCount(readOrder()?.items.length ?? 0); }, [panel]);
+  useEffect(() => { captureUtms(); }, []);
   const [quantity, setQuantity] = useState(1);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [fields, setFields] = useState<Record<string, string>>({});
@@ -2260,7 +2262,7 @@ function Index() {
     </div>
     <div className={"mt-7 \x62order-t pt-5"} style={{ borderColor: "var(--kids-borda)" }}>
       <p className={"text-center \x74ext-xs \x6dd:\x74ext-left"} style={{ color: "var(--kids-texto-suave)" }}>Gelaki Brasil · CNPJ 19.633.664/0001-16 · Rua Safira, 40, São Joaquim, Contagem/MG, CEP 32113-030</p>
-      <p className={"mt-1 text-center \x74ext-xs \x6dd:\x74ext-left"} style={{ color: "var(--kids-texto-suave)" }}>© 2026 Gelaki Brasil. Todos os direitos reservados. · <a href="/privacidade" className="underline">Privacidade e cookies</a></p>
+      <p className={"mt-1 text-center \x74ext-xs \x6dd:\x74ext-left"} style={{ color: "var(--kids-texto-suave)" }}>© 2026 Gelaki Brasil. Todos os direitos reservados. · <a href="/rastreio" className="underline">Rastrear pedido</a> · <a href="/privacidade" className="underline">Privacidade e cookies</a></p>
     </div>
   </div>
 </footer>
