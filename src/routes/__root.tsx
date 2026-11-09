@@ -13,6 +13,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { startAdvertising } from "@/lib/advertising";
 
 function NotFoundComponent() {
   return (
@@ -131,6 +132,7 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 function RootComponent() {
+  useEffect(() => { startAdvertising(); }, []);
   const { queryClient } = Route.useRouteContext();
 
   return (

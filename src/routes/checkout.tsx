@@ -385,6 +385,7 @@ function Checkout() {
             </aside>
           </main>
         )}
+        <p className="pb-8 text-center text-xs" style={{ color: "var(--kids-texto-suave)" }}>Gelaki Brasil · CNPJ 19.633.664/0001-16 · <a href="/privacidade" className="underline">Privacidade e cookies</a></p>
       </div>
     </>
   );

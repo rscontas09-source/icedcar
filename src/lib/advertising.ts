@@ -5,7 +5,7 @@ export type ConsentRecord = { allowed: boolean; at: string; region: string; noti
 type Pixel = ((...args: unknown[]) => void) & { callMethod?: (...args: unknown[]) => void; queue: unknown[][]; push?: Pixel; loaded: boolean; version: string };
 declare global { interface Window { fbq?: Pixel; _fbq?: Pixel } }
 export function permitsAdvertising(record: ConsentRecord | null, gpc: boolean) {
-  return !gpc && record?.allowed === true && record.notice === NOTICE_VERSION;
+  return !gpc && record?.allowed !== false;
 }
 export function purchaseIsConfirmed(status: string, amount: number) {
   return status === "PAID" && Number.isSafeInteger(amount) && amount > 0;
@@ -35,4 +35,11 @@ export function reportConfirmedPurchase(status: string, amount: number, paymentI
   if (!advertisingAllowed()) return;
   initializePixel();
   window.fbq?.("track", "Purchase", { value: amount / 100, currency: "BRL" }, { eventID: `icedcar_purchase_${paymentId}` });
+}export function setAdvertisingChoice(allowed: boolean) {
+  localStorage.setItem(CONSENT_KEY, JSON.stringify({ allowed, at: new Date().toISOString(), region: "BR", notice: NOTICE_VERSION }));
+  if (allowed) { initializePixel(); window.fbq?.("track", "PageView"); } else window.fbq?.("consent", "revoke");
+}
+export function startAdvertising() {
+  if (!advertisingAllowed()) { window.fbq?.("consent", "revoke"); return; }
+  initializePixel(); window.fbq?.("track", "PageView");
 }
