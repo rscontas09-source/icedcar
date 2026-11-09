@@ -337,7 +337,7 @@ function Checkout() {
                 )}
                 <div className="mt-1 flex flex-wrap items-center gap-1.5">
                   <span className="flex h-6 items-center rounded border px-2 text-[11px] font-bold" style={{ color: "var(--kids-cta)", background: "#fff" }}>PIX</span>
-                  {["visa", "mastercard", "elo", "hipercard", "amex"].map((b) => <img key={b} src={`https://cdn.jsdelivr.net/gh/aaronfagan/svg-credit-card-payment-icons/flat/${b}.svg`} alt={b} loading="lazy" className="h-6 w-auto rounded" />)}
+                  {["visa", "mastercard", "elo", "hipercard", "amex"].map((b) => <img key={b} src={`https://cdn.jsdelivr.net/gh/aaronfagan/svg-credit-card-payment-icons/flat/${b}.svg`} alt={b} loading="lazy" className="rounded" style={{ height: 24, width: 38, maxWidth: 38, objectFit: "contain", display: "inline-block" }} />)}
                 </div>
                 <div className="mt-4 rounded-2xl p-3 text-xs" style={{ background: "var(--kids-sale-suave)" }}>
                   <p className="font-bold" style={{ color: "var(--kids-sale)" }}>⚠️ Finalize apenas se for pagar agora</p>
