@@ -87,9 +87,9 @@ export const createPixPayment = createServerFn({ method: "POST" })
     try {
       const r = await connectpay("/transactions", { method: "POST", body: {
         external_id: orderId, total_amount: total / 100, payment_method: "PIX",
-        description: body.description, ip: body.ip || "127.0.0.1",
-        customer: { name: data.payer.name, email: data.payer.email, document: data.payer.taxId.replace(/\D/g, ""), phone: data.payer.phone },
-        items: body.items.map((item) => ({ title: item.name, quantity: item.quantity, unit_price: item.price / 100, tangible: true })),
+        ip: body.ip || "127.0.0.1",
+        customer: { name: data.payer.name, email: data.payer.email, document: data.payer.taxId.replace(/\D/g, ""), document_type: "CPF", phone: data.payer.phone },
+        items: body.items.map((item, index) => ({ id: `${orderId}_${index}`, title: item.name, description: item.name, quantity: item.quantity, price: item.price / 100, is_physical: true })),
         webhook_url: "https://icedcar.lovable.app/api/public/connectpay-webhook",
       } });
       const pix = r["pix"] as { payload?: unknown } | undefined;
