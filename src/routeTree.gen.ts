@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
+import { Route as RastreioRouteImport } from './routes/rastreio'
 import { Route as ApiPublicConnectpayWebhookRouteImport } from './routes/api/public/connectpay-webhook'
 
 const IndexRoute = IndexRouteImport.update({
@@ -29,6 +30,11 @@ const PrivacidadeRoute = PrivacidadeRouteImport.update({
   path: '/privacidade',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RastreioRoute = RastreioRouteImport.update({
+  id: '/rastreio',
+  path: '/rastreio',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicConnectpayWebhookRoute =
   ApiPublicConnectpayWebhookRouteImport.update({
     id: '/api/public/connectpay-webhook',
@@ -40,12 +46,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rastreio': typeof RastreioRoute
   '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rastreio': typeof RastreioRoute
   '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
 }
 export interface FileRoutesById {
@@ -53,19 +61,30 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
+  '/rastreio': typeof RastreioRoute
   '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/checkout' | '/privacidade' | '/api/public/connectpay-webhook'
+    | '/'
+    | '/checkout'
+    | '/privacidade'
+    | '/rastreio'
+    | '/api/public/connectpay-webhook'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/checkout' | '/privacidade' | '/api/public/connectpay-webhook'
+  to:
+    | '/'
+    | '/checkout'
+    | '/privacidade'
+    | '/rastreio'
+    | '/api/public/connectpay-webhook'
   id:
     | '__root__'
     | '/'
     | '/checkout'
     | '/privacidade'
+    | '/rastreio'
     | '/api/public/connectpay-webhook'
   fileRoutesById: FileRoutesById
 }
@@ -73,6 +92,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CheckoutRoute: typeof CheckoutRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
+  RastreioRoute: typeof RastreioRoute
   ApiPublicConnectpayWebhookRoute: typeof ApiPublicConnectpayWebhookRoute
 }
 
@@ -99,6 +119,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacidadeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/rastreio': {
+      id: '/rastreio'
+      path: '/rastreio'
+      fullPath: '/rastreio'
+      preLoaderRoute: typeof RastreioRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/connectpay-webhook': {
       id: '/api/public/connectpay-webhook'
       path: '/api/public/connectpay-webhook'
@@ -113,6 +140,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CheckoutRoute: CheckoutRoute,
   PrivacidadeRoute: PrivacidadeRoute,
+  RastreioRoute: RastreioRoute,
   ApiPublicConnectpayWebhookRoute: ApiPublicConnectpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
