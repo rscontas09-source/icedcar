@@ -5,6 +5,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import capturedCSS from "../styles/site.css?raw";
 import { PersonalizeModal } from "@/components/PersonalizeModal";
 import { CartDrawer, readOrder } from "@/components/CartDrawer";
+import { captureUtms } from "@/lib/tracking";
 
 export const Route = createFileRoute("/")({
   head: () => ({ meta: [
@@ -23,6 +24,7 @@ function Index() {
   const [panel, setPanel] = useState<string | null>(null);
   const [cartCount, setCartCount] = useState(0);
   useEffect(() => { setCartCount(readOrder()?.items.length ?? 0); }, [panel]);
+  useEffect(() => { captureUtms(); }, []);
   const [quantity, setQuantity] = useState(1);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [fields, setFields] = useState<Record<string, string>>({});
