@@ -55,7 +55,7 @@ function buildBody(data: Base, method: "PIX" | "CREDIT_CARD", extraMeta: Record<
   const sv = [process.env["MASTERFY_SELLER_TAX_ID"] ?? "", process.env["MASTERFY_SELLER_EMAIL"] ?? ""].map((v) => v.trim());
   const sellerEmail = sv.find((v) => v.includes("@")) ?? "";
   const sellerTax = (sv.find((v) => !v.includes("@")) ?? "").replace(/\D/g, "");
-  const ip = (getRequestHeader("cf-connecting-ip") || getRequestHeader("x-forwarded-for") || "").split(",")[0]!.trim().slice(0, 45);
+  const ip = ((getRequestHeader("cf-connecting-ip") || getRequestHeader("x-forwarded-for") || "").split(",")[0] ?? "").trim().slice(0, 45);
   const body = {
     amount, currency: "BRL", method,
     description: `Pedido ${orderId} - Mini Cooler IcedCar`, externalRef: orderId,
@@ -81,19 +81,22 @@ async function post(key: string, body: unknown) {
 export const createPixPayment = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => base.parse(d))
   .handler(async ({ data }) => {
-    const { xpag, parseXpagCharge } = await import("./xpag.server");
-    const { fee, amount, orderId } = buildBody(data, "PIX");
+    const { connectpay } = await import("./connectpay.server");
+    const { body, fee, amount, orderId } = buildBody(data, "PIX");
     const total = amount + fee;
     try {
-      const r = await xpag("/cashin", { appKey: process.env["LOVABLE_API_KEY"], connectionKey: process.env["UDC_XPAG_API_KEY"] }, {
-        amount: total / 100, currency: "BRL", name: data.payer.name, document: data.payer.taxId.replace(/\D/g, ""),
-        description: `Pedido ${orderId} - Mini Cooler IcedCar`, external_id: orderId,
+      const r = await connectpay("/transactions", { method: "POST", body: {
+        external_id: orderId, total_amount: total / 100, payment_method: "PIX",
+        description: body.description, ip: body.ip || "127.0.0.1",
+        customer: { name: data.payer.name, email: data.payer.email, document: data.payer.taxId.replace(/\D/g, ""), phone: data.payer.phone },
+        items: body.items.map((item) => ({ title: item.name, quantity: item.quantity, unit_price: item.price / 100, tangible: true })),
         webhook_url: "https://icedcar.lovable.app/api/public/connectpay-webhook",
-      });
-      const charge = parseXpagCharge(r);
-      return { ok: true as const, id: "xp_" + charge.id, orderId, amount: total, copypaste: charge.code };
+      } });
+      const pix = r["pix"] as { payload?: unknown } | undefined;
+      if (typeof r["id"] !== "string" || typeof pix?.payload !== "string" || !pix.payload) throw new Error("Invalid ConnectPay PIX response");
+      return { ok: true as const, id: "cp_" + r["id"], orderId, amount: total, copypaste: pix.payload };
     } catch (e) {
-      console.error("XPag pix failed", e);
+      console.error("ConnectPay pix failed", e);
       return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
     }
   });

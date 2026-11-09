@@ -31,5 +31,5 @@ use the editor.
 
 ## Imported website
 - Keep imported page markup and interaction repairs in its route file, and preserve captured CSS and assets separately to retain source fidelity.
-- Payments go through Masterfy via a server function in src/lib/payment.functions.ts; prices are recomputed server-side from src/lib/order.ts so the browser cannot set the amount.
+- PIX creation uses ConnectPay and cards use Masterfy through src/lib/payment.functions.ts; retain legacy provider status checks for existing charges and recompute prices server-side from src/lib/order.ts so the browser cannot set the amount.
 - Advertising is isolated in a shared browser consent module: explicit acceptance gates Meta loading and confirmed-payment events, with stable payment-based IDs and no replay after refusal, to avoid counting payment attempts as sales.
