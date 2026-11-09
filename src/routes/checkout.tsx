@@ -149,7 +149,7 @@ function Checkout() {
     if (!order || !validate()) return;
     setBusy(true); setPayErr("");
     localStorage.setItem("icedcar-buyer", JSON.stringify({ name: f.name, email: f.email, phone: f.phone }));
-    const common = {
+    const common = { utms: getUtms(),
       order,
       payer: { name: f.name.trim(), email: f.email.trim(), phone: f.phone.replace(/\D/g, ""), taxId: f.cpf.replace(/\D/g, "") },
       address: { zipCode: f.cep.replace(/\D/g, ""), state: f.state.toUpperCase(), city: f.city.trim(), district: f.district.trim(), street: f.street.trim(), number: f.number.trim(), complement: f.complement.trim() || undefined },
