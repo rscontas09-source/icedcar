@@ -335,11 +335,23 @@ function Checkout() {
                     {!cardReady && !payErr && <p className="col-span-6 text-xs" style={{ color: "var(--kids-texto-suave)" }}>Carregando pagamento seguro…</p>}
                   </div>
                 )}
+                <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                  <span className="flex h-6 items-center rounded border px-2 text-[11px] font-bold" style={{ color: "var(--kids-cta)", background: "#fff" }}>PIX</span>
+                  {["visa", "mastercard", "elo", "hipercard", "amex"].map((b) => <img key={b} src={`https://cdn.jsdelivr.net/gh/aaronfagan/svg-credit-card-payment-icons/flat/${b}.svg`} alt={b} loading="lazy" className="h-6 w-auto rounded" />)}
+                </div>
+                <div className="mt-4 rounded-2xl p-3 text-xs" style={{ background: "var(--kids-sale-suave)" }}>
+                  <p className="font-bold" style={{ color: "var(--kids-sale)" }}>⚠️ Finalize apenas se for pagar agora</p>
+                  <p className="mt-1" style={{ color: "var(--kids-texto)" }}>Cada IcedCar é produzido sob encomenda. Ao finalizar, sua vaga na produção fica reservada para você. Se não for concluir agora, deixe a vez para quem está aguardando.</p>
+                </div>
                 {payErr && <p role="alert" className="mt-3 rounded-xl px-3 py-2 text-sm font-semibold" style={{ background: "var(--kids-sale-suave)", color: "var(--kids-sale)" }}>{payErr}</p>}
                 <button type="submit" disabled={busy} className="kids-btn kids-btn-cta mt-4 w-full disabled:opacity-60">{busy ? (method === "pix" ? "Gerando PIX…" : "Processando cartão…") : method === "pix" ? `Pagar com PIX · ${brl(pixTotal(order))}` : `Pagar ${inst}x de ${brl(Math.ceil(cardTotal(order) / inst))}`}</button>
-                <ul className="mt-4 grid grid-cols-2 gap-2 text-[11px] font-semibold" style={{ color: "var(--kids-texto-suave)" }}>
-                  <li>🔒 Dados criptografados</li><li>🧾 Nota fiscal eletrônica</li><li>↩️ 7 dias para troca</li><li>✅ +10 mil clientes</li>
-                </ul>
+                <p className="mt-2 text-center text-[11px] font-semibold" style={{ color: "var(--kids-texto-suave)" }}>🛡️ Ambiente protegido com criptografia SSL</p>
+                <div className="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] font-bold">
+                  {[["🔒", "Compra 100% segura"], ["🚚", "Envio com rastreio para todo Brasil"], ["↩️", "7 dias de garantia"]].map(([i, t]) => (
+                    <div key={t} className="flex flex-col items-center gap-1 rounded-2xl p-3" style={{ border: "1px solid var(--kids-borda)", background: "#fff" }}><span className="text-lg">{i}</span>{t}</div>
+                  ))}
+                </div>
+                <p className="mt-3 rounded-xl px-3 py-2 text-center text-xs font-semibold" style={{ background: "var(--kids-fundo-suave)" }}>📅 Produção em até 3 dias úteis + entrega pelos Correios · código de rastreio por e-mail e WhatsApp</p>
               </section>
             </form>
 
