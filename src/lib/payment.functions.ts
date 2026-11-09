@@ -22,6 +22,7 @@ const base = z.object({
     district: z.string().min(1).max(80), street: z.string().min(2).max(120), number: z.string().min(1).max(10),
     complement: z.string().max(60).optional(),
   }),
+  utms: z.record(z.string().max(40), z.string().max(200)).optional(),
 });
 type Base = z.infer<typeof base>;
 
@@ -70,6 +71,13 @@ function buildBody(data: Base, method: "PIX" | "CREDIT_CARD", extraMeta: Record<
   return { body, fee, amount, orderId };
 }
 
+async function record(data: Base, paymentId: string, method: "PIX" | "CARD", amount: number, fallback: string) {
+  const { saveOrder } = await import("./orders.server");
+  const n = await saveOrder({ paymentId, method, amount, name: data.payer.name, email: data.payer.email, cpf: data.payer.taxId,
+    city: data.address.city, state: data.address.state, items: data.order.items, utms: data.utms });
+  return n ?? fallback;
+}
+
 async function post(key: string, body: unknown) {
   const res = await fetch(`${API}/payment`, {
     method: "POST", headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" }, body: JSON.stringify(body),
@@ -94,7 +102,9 @@ export const createPixPayment = createServerFn({ method: "POST" })
       } });
       const pix = r["pix"] as { payload?: unknown } | undefined;
       if (typeof r["id"] !== "string" || typeof pix?.payload !== "string" || !pix.payload) throw new Error("Invalid ConnectPay PIX response");
-      return { ok: true as const, id: "cp_" + r["id"], orderId, amount: total, copypaste: pix.payload };
+      const id = "cp_" + r["id"];
+      const number = await record(data, id, "PIX", total, orderId);
+      return { ok: true as const, id, orderId: number, amount: total, copypaste: pix.payload };
     } catch (e) {
       console.error("ConnectPay pix failed", e);
       return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
@@ -118,7 +128,8 @@ export const createCardPayment = createServerFn({ method: "POST" })
       }
       if (json.status === "REFUSED") return { ok: false as const, error: "Cartão recusado pelo banco. Tente outro cartão ou pague no PIX." };
       // the whole response goes back so the 3DS SDK finish() can use it
-      return { ok: true as const, id: json.id, orderId, status: json.status ?? "PROCESSING", amount: (json.amount ?? amount) + fee, response: JSON.stringify(json) };
+      const number = await record(data, json.id, "CARD", (json.amount ?? amount) + fee, orderId);
+      return { ok: true as const, id: json.id, orderId: number, status: json.status ?? "PROCESSING", amount: (json.amount ?? amount) + fee, response: JSON.stringify(json) };
     } catch (e) {
       console.error("Masterfy card fetch failed", e);
       return { ok: false as const, error: "Falha de conexão com o pagamento. Tente novamente." };
@@ -128,6 +139,16 @@ export const createCardPayment = createServerFn({ method: "POST" })
 export const getPaymentStatus = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => z.object({ id: z.string().regex(/^(xp_[A-Za-z0-9_-]{1,160}|cp_[A-Fa-f0-9-]{36}|[a-z0-9]{10,40})$/), amount: z.number().int().positive().optional() }).parse(d))
   .handler(async ({ data }) => {
+    const r = await checkProvider(data);
+    if (r.status === "PAID" || r.status === "REFUSED") {
+      const { markOrderStatus } = await import("./orders.server");
+      await markOrderStatus(data.id, r.status);
+    }
+    return r;
+  });
+
+async function checkProvider(data: { id: string; amount?: number | undefined }): Promise<{ status: string }> {
+  {
     if (data.id.startsWith("cp_")) {
       const tx = data.id.slice(3);
       try {
@@ -155,7 +176,8 @@ export const getPaymentStatus = createServerFn({ method: "POST" })
     } catch {
       return { status: "UNKNOWN" };
     }
-  });
+  }
+}
 
 /** Publishable key used only to encrypt the card in the browser. */
 export const getTokenizationKey = createServerFn({ method: "GET" }).handler(async () => ({ key: process.env["MASTERFY_TOKENIZATION_KEY"] ?? "" }));

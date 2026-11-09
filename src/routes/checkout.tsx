@@ -5,6 +5,7 @@ import capturedCSS from "../styles/site.css?raw";
 import { createPixPayment, createCardPayment, getPaymentStatus, getTokenizationKey } from "@/lib/payment.functions";
 import { type Order, ORDER_KEY, brl, cardTotal, cardSubtotal, isValidCPF, pixTotal, shipping, subtotal, PIX_DISCOUNT, MAX_INSTALLMENTS } from "@/lib/order";
 import { reportConfirmedPurchase } from "@/lib/advertising";
+import { getUtms } from "@/lib/tracking";
 
 type Card = { number: string; holder: string; expMonth: string; expYear: string; cvv: string };
 type MfTok = { init: (k: string) => Promise<void>; encrypt: (c: Card) => Promise<string> };
@@ -385,7 +386,7 @@ function Checkout() {
             </aside>
           </main>
         )}
-        <p className="pb-8 text-center text-xs" style={{ color: "var(--kids-texto-suave)" }}>Gelaki Brasil · CNPJ 19.633.664/0001-16 · <a href="/privacidade" className="underline">Privacidade e cookies</a></p>
+        <p className="pb-8 text-center text-xs" style={{ color: "var(--kids-texto-suave)" }}>Gelaki Brasil · CNPJ 19.633.664/0001-16 · <Link to="/rastreio" className="underline">Rastrear pedido</Link> · <a href="/privacidade" className="underline">Privacidade e cookies</a></p>
       </div>
     </>
   );
