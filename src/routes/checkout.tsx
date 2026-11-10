@@ -264,36 +264,14 @@ function Checkout() {
             </div>
           </main>
         ) : (
-          <main className="mx-auto grid max-w-5xl gap-5 px-4 pb-16 md:grid-cols-[1fr_380px]">
-            <div className="md:col-span-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl px-4 py-3 text-center text-sm font-bold" style={{ background: "var(--kids-sale-suave)", color: "var(--kids-sale)" }}>
+          <main className="mx-auto grid max-w-2xl gap-5 px-4 pb-16">
+            <div className="order-1 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 rounded-2xl px-4 py-3 text-center text-sm font-bold" style={{ background: "var(--kids-sale-suave)", color: "var(--kids-sale)" }}>
               <span>⏱ Seu desconto está reservado por <span className="tabular-nums">{mm}:{ss}</span></span>
               <span className="text-xs font-semibold">🔥 {viewers} pessoas vendo este produto agora · restam poucas unidades</span>
             </div>
 
-            <details className="md:hidden overflow-hidden" style={{ ...box, padding: 0 }}>
-              <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
-                <img src={prod?.images[0]?.src ?? "/site-assets/1570458ae2415f83.webp"} alt="" className="h-12 w-12 flex-shrink-0 rounded-xl object-contain" style={{ background: "var(--kids-fundo-suave)" }} />
-                <span className="min-w-0 flex-1 text-sm font-bold">Ver resumo do pedido ▾<span className="block truncate text-xs font-normal" style={{ color: "var(--kids-texto-suave)" }}>{prod ? `${order.quantity}x ${prod.name}` : `${order.items.length}x IcedCar · placa “${order.items[0]?.placa}”`}</span></span>
-                <span className="text-base font-bold" style={{ color: "var(--kids-cta)" }}>{brl(method === "pix" ? pixTotal(order) : cardTotal(order))}</span>
-              </summary>
-              <div className="space-y-2 px-4 pb-4 text-xs">
-                {prod && (
-                  <div className="flex gap-3 rounded-xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
-                    <div className="min-w-0 text-xs"><p className="text-sm font-bold">{prod.name}</p><p>Quantidade: {order.quantity} · {brl(prod.price)} cada</p></div>
-                  </div>
-                )}
-                {order.items.map((i, n) => (
-                  <div key={n} className="rounded-xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
-                    <p className="font-bold">Mini Cooler IcedCar 45L</p>
-                    <p style={{ color: "var(--kids-texto-suave)" }}>{i.marca} {i.modelo} {i.ano} · {i.cor} · {i.lado}</p>
-                    <p className="font-bold">Placa: “{i.placa}”{i.prioridade ? " · ⚡ Prioridade" : ""}</p>
-                  </div>
-                ))}
-                <div className="flex justify-between text-sm"><span>Frete</span><span>{shipping(order) ? brl(shipping(order)) : "Grátis"}</span></div>
-              </div>
-            </details>
 
-            <form onSubmit={submit} noValidate className="space-y-5 md:order-1">
+            <form onSubmit={submit} noValidate className="order-3 space-y-5">
               <section className="p-5" style={box}>
                 <h2 className="kids-titulo mb-4 text-lg">1. Seus dados</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -349,7 +327,7 @@ function Checkout() {
                 </div>
                 <div className="mt-4 rounded-2xl p-3 text-xs" style={{ background: "var(--kids-sale-suave)" }}>
                   <p className="font-bold" style={{ color: "var(--kids-sale)" }}>⚠️ Finalize apenas se for pagar agora</p>
-                  <p className="mt-1" style={{ color: "var(--kids-texto)" }}>Cada IcedCar é produzido sob encomenda. Ao finalizar, sua vaga na produção fica reservada para você. Se não for concluir agora, deixe a vez para quem está aguardando.</p>
+                  <p className="mt-1" style={{ color: "var(--kids-texto)" }}>{prod ? "Estoque limitado: ao finalizar, sua unidade fica reservada para você." : "Cada IcedCar é produzido sob encomenda. Ao finalizar, sua vaga na produção fica reservada para você."} Se não for concluir agora, deixe a vez para quem está aguardando.</p>
                 </div>
                 {payErr && <p role="alert" className="mt-3 rounded-xl px-3 py-2 text-sm font-semibold" style={{ background: "var(--kids-sale-suave)", color: "var(--kids-sale)" }}>{payErr}</p>}
                 <button type="submit" disabled={busy} className="kids-btn kids-btn-cta mt-4 w-full disabled:opacity-60">{busy ? (method === "pix" ? "Gerando PIX…" : "Processando cartão…") : method === "pix" ? `Pagar com PIX · ${brl(pixTotal(order))}` : `Pagar ${inst}x de ${brl(Math.ceil(cardTotal(order) / inst))}`}</button>
@@ -363,8 +341,8 @@ function Checkout() {
               </section>
             </form>
 
-            <aside className="hidden md:order-2 md:block">
-              <div className="space-y-3 p-5 md:sticky md:top-4" style={box}>
+            <aside className="order-2">
+              <div className="space-y-3 p-5" style={box}>
                 <h2 className="kids-titulo text-lg">Resumo do pedido</h2>
                 {prod && (
                   <div className="flex gap-3 rounded-2xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
