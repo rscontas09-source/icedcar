@@ -1,7 +1,8 @@
 import { createServerFn } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { pixTotal, shipping, cardSubtotal, UNIT_PRICE, CARD_UNIT_PRICE, PRIORITY_PRICE, PIX_DISCOUNT, MAX_INSTALLMENTS, isValidCPF, type Order } from "./order";
+import { pixTotal, shipping, cardSubtotal, CARD_UNIT_PRICE, PRIORITY_PRICE, MAX_INSTALLMENTS, isValidCPF, isValidOrder, pixPrice, type Order } from "./order";
+import { productBySlug } from "./catalog";
 
 const API = "https://api.masterfypagamentos.com/v1";
 
@@ -12,7 +13,7 @@ const custom = z.object({
 });
 
 const base = z.object({
-  order: z.object({ quantity: z.number().int().min(1).max(10), items: z.array(custom).min(1).max(10) }),
+  order: z.object({ quantity: z.number().int().min(1).max(10), items: z.array(custom).max(10), product: z.string().max(80).optional() }).refine(isValidOrder, "Pedido inválido"),
   payer: z.object({
     name: z.string().trim().min(5).max(100), email: z.string().trim().email().max(255),
     phone: z.string().regex(/^\d{10,11}$/), taxId: z.string().refine(isValidCPF, "CPF inválido"),
@@ -44,15 +45,13 @@ function buildBody(data: Base, method: "PIX" | "CREDIT_CARD", extraMeta: Record<
   const isPix = method === "PIX";
   const amount = isPix ? pixTotal(order as Order) - fee : cardSubtotal(order as Order);
   const orderId = "ice_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  const items = order.items.map((i) => {
-    const extra = i.prioridade ? PRIORITY_PRICE : 0;
-    return {
-      quantity: 1,
-      name: `Mini Cooler IcedCar - ${i.marca} ${i.modelo} ${i.ano} - ${i.placa}`.slice(0, 256),
-      price: isPix ? Math.round((UNIT_PRICE + extra) * (1 - PIX_DISCOUNT)) : CARD_UNIT_PRICE + extra,
-      type: "PHYSICAL",
-    };
-  });
+  const prod = order.product ? productBySlug(order.product) : undefined;
+  const items = prod
+    ? [{ quantity: order.quantity, name: prod.name.slice(0, 256), price: isPix ? pixPrice(prod.price) : prod.price, type: "PHYSICAL" }]
+    : order.items.map((i) => {
+      const card = CARD_UNIT_PRICE + (i.prioridade ? PRIORITY_PRICE : 0);
+      return { quantity: 1, name: `Mini Cooler IcedCar - ${i.marca} ${i.modelo} ${i.ano} - ${i.placa}`.slice(0, 256), price: isPix ? pixPrice(card) : card, type: "PHYSICAL" };
+    });
   const sv = [process.env["MASTERFY_SELLER_TAX_ID"] ?? "", process.env["MASTERFY_SELLER_EMAIL"] ?? ""].map((v) => v.trim());
   const sellerEmail = sv.find((v) => v.includes("@")) ?? "";
   const sellerTax = (sv.find((v) => !v.includes("@")) ?? "").replace(/\D/g, "");
@@ -74,7 +73,7 @@ function buildBody(data: Base, method: "PIX" | "CREDIT_CARD", extraMeta: Record<
 async function record(data: Base, paymentId: string, method: "PIX" | "CARD", amount: number, fallback: string) {
   const { saveOrder } = await import("./orders.server");
   const n = await saveOrder({ paymentId, method, amount, name: data.payer.name, email: data.payer.email, cpf: data.payer.taxId,
-    city: data.address.city, state: data.address.state, items: data.order.items, utms: data.utms });
+    city: data.address.city, state: data.address.state, items: data.order.product ? [{ product: data.order.product, quantity: data.order.quantity }] : data.order.items, utms: data.utms });
   return n ?? fallback;
 }
 
