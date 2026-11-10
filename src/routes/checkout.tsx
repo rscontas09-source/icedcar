@@ -368,10 +368,6 @@ function Checkout() {
                   <div className="flex justify-between pt-2 text-lg font-bold"><dt>{method === "pix" ? "Total no PIX" : "Total no cartão"}</dt><dd style={{ color: "var(--kids-cta)" }}>{brl(method === "pix" ? pixTotal(order) : cardTotal(order))}</dd></div>
                   {method === "pix" && <p className="text-right text-[11px] line-through" style={{ color: "var(--kids-texto-suave)" }}>No cartão {brl(cardTotal(order))}</p>}
                 </dl>
-                <div className="rounded-2xl p-3 text-xs" style={{ background: "var(--kids-fundo-suave)" }}>
-                  <p>⭐⭐⭐⭐⭐ “Ficou idêntico ao meu carro, presente perfeito!”</p>
-                  <p className="mt-1 font-semibold" style={{ color: "var(--kids-texto-suave)" }}>— cliente verificado</p>
-                </div>
               </div>
             </aside>
           </main>
