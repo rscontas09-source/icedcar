@@ -273,7 +273,7 @@ function Checkout() {
 
             <form onSubmit={submit} noValidate className="order-3 space-y-5">
               <section className="p-5" style={box}>
-                <h2 className="kids-titulo mb-4 text-lg">1. Seus dados</h2>
+                <h2 className="kids-titulo mb-4 text-lg">1. Identificação</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {field("name", "Nome completo", { autoComplete: "name", className: "sm:col-span-2", maxLength: 100 })}
                   {field("email", "E-mail", { type: "email", autoComplete: "email", className: "sm:col-span-2", maxLength: 255 })}
