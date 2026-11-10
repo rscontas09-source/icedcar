@@ -72,7 +72,7 @@ function buildBody(data: Base, method: "PIX" | "CREDIT_CARD", extraMeta: Record<
 
 async function record(data: Base, paymentId: string, method: "PIX" | "CARD", amount: number, fallback: string, pixCode?: string) {
   const { saveOrder } = await import("./orders.server");
-  const n = await saveOrder({ paymentId, method, amount, name: data.payer.name, email: data.payer.email, cpf: data.payer.taxId,
+  const n = await saveOrder({ paymentId, method, amount, name: data.payer.name, email: data.payer.email, cpf: data.payer.taxId, phone: data.payer.phone,
     city: data.address.city, state: data.address.state, items: data.order.product ? [{ product: data.order.product, quantity: data.order.quantity }] : data.order.items, utms: data.utms, pixCode });
   return { number: n?.number ?? fallback, ref: n?.id ?? null };
 }

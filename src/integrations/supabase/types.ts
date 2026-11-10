@@ -22,6 +22,7 @@ export type Database = {
           customer_cpf: string
           customer_email: string
           customer_name: string
+          customer_phone: string | null
           id: string
           items: Json
           method: string
@@ -40,6 +41,7 @@ export type Database = {
           customer_cpf: string
           customer_email: string
           customer_name: string
+          customer_phone?: string | null
           id?: string
           items?: Json
           method: string
@@ -58,6 +60,7 @@ export type Database = {
           customer_cpf?: string
           customer_email?: string
           customer_name?: string
+          customer_phone?: string | null
           id?: string
           items?: Json
           method?: string
