@@ -17,6 +17,7 @@ export const Route = createFileRoute("/rastreio")({
       { name: "robots", content: "noindex" },
     ],
   }),
+  staticData: { importedDocument: { html: { lang: "pt-BR" }, body: { "data-tema": "kids" } } },
   component: TrackPage,
 });
 

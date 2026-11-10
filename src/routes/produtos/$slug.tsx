@@ -15,6 +15,7 @@ export const Route = createFileRoute("/produtos/$slug")({
     const d = loaderData ? `${loaderData.name} por ${brl(loaderData.price)} ou ${brl(pixPrice(loaderData.price))} no PIX (10% OFF). ${loaderData.summary}` : "Caixas térmicas Gelaki Brasil.";
     return { meta: [{ title: t }, { name: "description", content: d }, { property: "og:title", content: t }, { property: "og:description", content: d }, { property: "og:type", content: "product" }, { name: "twitter:card", content: "summary_large_image" }] };
   },
+  staticData: { importedDocument: { html: { lang: "pt-BR" }, body: { "data-tema": "kids" } } },
   component: ProductPage,
   errorComponent: () => <p className="p-8 text-center">Não foi possível abrir este produto. <Link to="/">Voltar à loja</Link></p>,
   notFoundComponent: () => <p className="p-8 text-center">Produto não encontrado. <Link to="/">Voltar à loja</Link></p>,
@@ -44,7 +45,7 @@ function ProductPage() {
   const others = PRODUCTS.filter((o) => o.slug !== p.slug).slice(0, 4);
   const current = p.images[img] ?? p.images[0];
   return (
-    <div data-tema="kids"><div data-theme="kids" className="min-h-screen" style={{ background: "var(--kids-fundo)", color: "var(--kids-texto)" }}>
+    <div data-theme="kids" className="min-h-screen" style={{ background: "var(--kids-fundo)", color: "var(--kids-texto)" }}>
       <style>{capturedCSS}</style>
       <header className="p-4 text-center">
         <Link to="/" className="kids-titulo text-xl" style={{ color: "var(--kids-rosa-texto)" }}>Gelaki Brasil</Link>
@@ -105,6 +106,6 @@ function ProductPage() {
           </div>
         </section>
       </main>
-    </div></div>
+    </div>
   );
 }
