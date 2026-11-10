@@ -177,8 +177,6 @@ function Index() {
         <h1 className={"kids-titulo mb-3 \x74ext-2xl \x6ceading-tight \x6dd:\x74ext-3xl"}>Mini Cooler IcedCar 45L Personalizado com Seu Carro</h1>
         <div className="mb-5">
           <span className="mb-0.5 flex items-center gap-2">
-            <span className={"\x74ext-sm line-through"} style={{ color: "var(--kids-texto-suave)" }}>R$ 99,90</span>
-            <span className="kids-selo kids-selo-sale">-21%</span>
           </span>
           <span className={"kids-titulo block \x74ext-3xl \x6dd:\x74ext-4xl"} style={{ color: "var(--kids-rosa-texto)" }}>R$ 99,00</span>
           <span className={"mt-1 block \x74ext-sm \x66ont-semibold"} style={{ color: "var(--kids-cta)" }}>ou R$ 89,10 no PIX (10% OFF)</span>
