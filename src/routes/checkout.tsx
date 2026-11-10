@@ -3,7 +3,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import capturedCSS from "../styles/site.css?raw";
 import { createPixPayment, createCardPayment, getPaymentStatus, getTokenizationKey } from "@/lib/payment.functions";
-import { type Order, ORDER_KEY, brl, cardTotal, cardSubtotal, isValidCPF, pixTotal, shipping, subtotal, PIX_DISCOUNT, MAX_INSTALLMENTS } from "@/lib/order";
+import { productBySlug } from "@/lib/catalog";
+import { type Order, isValidOrder, ORDER_KEY, brl, cardTotal, cardSubtotal, isValidCPF, pixTotal, shipping, subtotal, PIX_DISCOUNT, MAX_INSTALLMENTS } from "@/lib/order";
 import { reportConfirmedPurchase } from "@/lib/advertising";
 import { getUtms } from "@/lib/tracking";
 
@@ -21,9 +22,9 @@ const cardErrMsg: Record<string, string> = { INVALID_CARD_NUMBER: "Número do ca
 export const Route = createFileRoute("/checkout")({
   head: () => ({ meta: [
     { title: "Finalizar compra - Mini Cooler IcedCar | Gelaki Brasil" },
-    { name: "description", content: "Checkout seguro do seu Mini Cooler IcedCar personalizado. PIX com 5% de desconto ou até 12x no cartão." },
+    { name: "description", content: "Checkout seguro do seu Mini Cooler IcedCar personalizado. PIX com 10% de desconto ou até 12x no cartão." },
     { property: "og:title", content: "Checkout seguro | Gelaki Brasil" },
-    { property: "og:description", content: "Finalize seu IcedCar personalizado com PIX e 5% de desconto." },
+    { property: "og:description", content: "Finalize seu IcedCar personalizado com PIX e 10% de desconto." },
     { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" },
     { name: "robots", content: "noindex" },
   ] }),
@@ -45,6 +46,7 @@ function luhn(n: string) { let s = 0; for (let i = 0; i < n.length; i++) { let d
 
 function Checkout() {
   const [order, setOrder] = useState<Order | null>(null);
+  const prod = order?.product ? productBySlug(order.product) : undefined;
   const [loaded, setLoaded] = useState(false);
   const [f, setF] = useState<F>(initial);
   const [err, setErr] = useState<Partial<Record<keyof F, string | undefined>>>({});
@@ -96,7 +98,7 @@ function Checkout() {
   }, [payId, status, checkStatus, pix]);
 
   useEffect(() => {
-    try { const o = JSON.parse(sessionStorage.getItem(ORDER_KEY) || "null"); if (o?.items?.length) setOrder(o); } catch { /* empty */ }
+    try { const o = JSON.parse(sessionStorage.getItem(ORDER_KEY) || "null"); if (o && Array.isArray(o.items) && isValidOrder(o)) setOrder(o); } catch { /* empty */ }
     try { const s = JSON.parse(localStorage.getItem("icedcar-buyer") || "null"); if (s) setF((x) => ({ ...x, ...s })); } catch { /* empty */ }
     setLoaded(true);
     const t = setInterval(() => setSecs((s) => (s > 0 ? s - 1 : 0)), 1000);
@@ -270,11 +272,16 @@ function Checkout() {
 
             <details className="md:hidden overflow-hidden" style={{ ...box, padding: 0 }}>
               <summary className="flex cursor-pointer list-none items-center gap-3 p-4">
-                <img src="/site-assets/1570458ae2415f83.webp" alt="" className="h-12 w-12 flex-shrink-0 rounded-xl object-contain" style={{ background: "var(--kids-fundo-suave)" }} />
-                <span className="min-w-0 flex-1 text-sm font-bold">Ver resumo do pedido ▾<span className="block truncate text-xs font-normal" style={{ color: "var(--kids-texto-suave)" }}>{order.items.length}x IcedCar · placa “{order.items[0]?.placa}”</span></span>
+                <img src={prod?.images[0]?.src ?? "/site-assets/1570458ae2415f83.webp"} alt="" className="h-12 w-12 flex-shrink-0 rounded-xl object-contain" style={{ background: "var(--kids-fundo-suave)" }} />
+                <span className="min-w-0 flex-1 text-sm font-bold">Ver resumo do pedido ▾<span className="block truncate text-xs font-normal" style={{ color: "var(--kids-texto-suave)" }}>{prod ? `${order.quantity}x ${prod.name}` : `${order.items.length}x IcedCar · placa “${order.items[0]?.placa}”`}</span></span>
                 <span className="text-base font-bold" style={{ color: "var(--kids-cta)" }}>{brl(method === "pix" ? pixTotal(order) : cardTotal(order))}</span>
               </summary>
               <div className="space-y-2 px-4 pb-4 text-xs">
+                {prod && (
+                  <div className="flex gap-3 rounded-xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
+                    <div className="min-w-0 text-xs"><p className="text-sm font-bold">{prod.name}</p><p>Quantidade: {order.quantity} · {brl(prod.price)} cada</p></div>
+                  </div>
+                )}
                 {order.items.map((i, n) => (
                   <div key={n} className="rounded-xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
                     <p className="font-bold">Mini Cooler IcedCar 45L</p>
@@ -359,6 +366,11 @@ function Checkout() {
             <aside className="hidden md:order-2 md:block">
               <div className="space-y-3 p-5 md:sticky md:top-4" style={box}>
                 <h2 className="kids-titulo text-lg">Resumo do pedido</h2>
+                {prod && (
+                  <div className="flex gap-3 rounded-2xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
+                    <img src={prod.images[0]?.src} alt="" className="h-16 w-16 flex-shrink-0 rounded-xl object-contain" style={{ background: "#fff" }} /><div className="min-w-0 text-xs"><p className="text-sm font-bold">{prod.name}</p><p>Quantidade: {order.quantity} · {brl(prod.price)} cada</p></div>
+                  </div>
+                )}
                 {order.items.map((i, n) => (
                   <div key={n} className="flex gap-3 rounded-2xl p-3" style={{ background: "var(--kids-fundo-suave)" }}>
                     <img src="/site-assets/1570458ae2415f83.webp" alt="" className="h-16 w-16 flex-shrink-0 rounded-xl object-contain" style={{ background: "#fff" }} />
@@ -369,11 +381,11 @@ function Checkout() {
                     </div>
                   </div>
                 ))}
-                <Link to="/" className="block text-xs font-semibold underline" style={{ color: "var(--kids-rosa-texto)" }}>Editar personalização</Link>
+                {prod ? <Link to="/produtos/$slug" params={{ slug: prod.slug }} className="block text-xs font-semibold underline" style={{ color: "var(--kids-rosa-texto)" }}>Alterar quantidade</Link> : <Link to="/" className="block text-xs font-semibold underline" style={{ color: "var(--kids-rosa-texto)" }}>Editar personalização</Link>}
                 <dl className="space-y-1 pt-2 text-sm" style={{ borderTop: "1px solid var(--kids-borda)" }}>
                   <div className="flex justify-between"><dt>Subtotal</dt><dd>{brl(subtotal(order))}</dd></div>
                   {method === "card" ? <div className="flex justify-between"><dt>Preço no cartão</dt><dd>{brl(cardSubtotal(order))}</dd></div> : null}
-                  {method === "pix" && <div className="flex justify-between" style={{ color: "var(--kids-cta)" }}><dt>Desconto PIX (5%)</dt><dd>−{brl(subtotal(order) - Math.round(subtotal(order) * (1 - PIX_DISCOUNT)))}</dd></div>}
+                  {method === "pix" && <div className="flex justify-between" style={{ color: "var(--kids-cta)" }}><dt>Desconto PIX ({Math.round(PIX_DISCOUNT * 100)}%)</dt><dd>−{brl(subtotal(order) + shipping(order) - pixTotal(order))}</dd></div>}
                   <div className="flex justify-between"><dt>Frete</dt><dd>{shipping(order) ? brl(shipping(order)) : "Grátis"}</dd></div>
                   <div className="flex justify-between pt-2 text-lg font-bold"><dt>{method === "pix" ? "Total no PIX" : "Total no cartão"}</dt><dd style={{ color: "var(--kids-cta)" }}>{brl(method === "pix" ? pixTotal(order) : cardTotal(order))}</dd></div>
                   {method === "pix" && <p className="text-right text-[11px] line-through" style={{ color: "var(--kids-texto-suave)" }}>No cartão {brl(cardTotal(order))}</p>}
