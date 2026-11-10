@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import capturedCSS from "../styles/site.css?raw";
 import { createPixPayment, createCardPayment, getPaymentStatus, getTokenizationKey } from "@/lib/payment.functions";
@@ -46,6 +46,7 @@ function luhn(n: string) { let s = 0; for (let i = 0; i < n.length; i++) { let d
 
 function Checkout() {
   const [order, setOrder] = useState<Order | null>(null);
+  const navigate = useNavigate();
   const prod = order?.product ? productBySlug(order.product) : undefined;
   const [loaded, setLoaded] = useState(false);
   const [f, setF] = useState<F>(initial);
@@ -159,6 +160,7 @@ function Checkout() {
     if (method === "pix") {
       try {
         const r = await pay({ data: common });
+        if (r.ok && r.orderRef) { sessionStorage.removeItem(ORDER_KEY); void navigate({ to: "/pedido/$id", params: { id: r.orderRef } }); return; }
         if (r.ok) { setPix(r); setPayId(r.id); sessionStorage.removeItem(ORDER_KEY); window.scrollTo({ top: 0, behavior: "smooth" }); }
         else setPayErr(r.error);
       } catch { setPayErr("Confira os dados informados e tente novamente."); }
@@ -185,6 +187,7 @@ function Checkout() {
       created = true;
       setPayId(r.id); setStatus(r.status); sessionStorage.removeItem(ORDER_KEY);
       if (t3) await t3.finish(JSON.parse(r.response)).catch(() => undefined);
+      if (r.orderRef) { void navigate({ to: "/pedido/$id", params: { id: r.orderRef } }); return; }
       setCardDone({ amount: r.amount, orderId: r.orderId }); window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
       const code = (e as { code?: string; message?: string }).code || (e as Error).message;
