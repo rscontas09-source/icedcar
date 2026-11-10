@@ -46,6 +46,7 @@ function luhn(n: string) { let s = 0; for (let i = 0; i < n.length; i++) { let d
 
 function Checkout() {
   const [order, setOrder] = useState<Order | null>(null);
+  const prod = order?.product ? productBySlug(order.product) : undefined;
   const [loaded, setLoaded] = useState(false);
   const [f, setF] = useState<F>(initial);
   const [err, setErr] = useState<Partial<Record<keyof F, string | undefined>>>({});
