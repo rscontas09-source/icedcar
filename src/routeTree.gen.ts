@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as PrivacidadeRouteImport } from './routes/privacidade'
 import { Route as RastreioRouteImport } from './routes/rastreio'
+import { Route as VendasRouteImport } from './routes/vendas'
 import { Route as PedidoIdRouteImport } from './routes/pedido/$id'
 import { Route as ProdutosSlugRouteImport } from './routes/produtos/$slug'
 import { Route as ApiPublicConnectpayWebhookRouteImport } from './routes/api/public/connectpay-webhook'
@@ -37,6 +38,11 @@ const RastreioRoute = RastreioRouteImport.update({
   path: '/rastreio',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendasRoute = VendasRouteImport.update({
+  id: '/vendas',
+  path: '/vendas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PedidoIdRoute = PedidoIdRouteImport.update({
   id: '/pedido/$id',
   path: '/pedido/$id',
@@ -59,6 +65,7 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
+  '/vendas': typeof VendasRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
@@ -68,6 +75,7 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
+  '/vendas': typeof VendasRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
@@ -78,6 +86,7 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/privacidade': typeof PrivacidadeRoute
   '/rastreio': typeof RastreioRoute
+  '/vendas': typeof VendasRoute
   '/pedido/$id': typeof PedidoIdRoute
   '/produtos/$slug': typeof ProdutosSlugRoute
   '/api/public/connectpay-webhook': typeof ApiPublicConnectpayWebhookRoute
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/privacidade'
     | '/rastreio'
+    | '/vendas'
     | '/pedido/$id'
     | '/produtos/$slug'
     | '/api/public/connectpay-webhook'
@@ -98,6 +108,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/privacidade'
     | '/rastreio'
+    | '/vendas'
     | '/pedido/$id'
     | '/produtos/$slug'
     | '/api/public/connectpay-webhook'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/privacidade'
     | '/rastreio'
+    | '/vendas'
     | '/pedido/$id'
     | '/produtos/$slug'
     | '/api/public/connectpay-webhook'
@@ -117,6 +129,7 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   PrivacidadeRoute: typeof PrivacidadeRoute
   RastreioRoute: typeof RastreioRoute
+  VendasRoute: typeof VendasRoute
   PedidoIdRoute: typeof PedidoIdRoute
   ProdutosSlugRoute: typeof ProdutosSlugRoute
   ApiPublicConnectpayWebhookRoute: typeof ApiPublicConnectpayWebhookRoute
@@ -152,6 +165,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RastreioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendas': {
+      id: '/vendas'
+      path: '/vendas'
+      fullPath: '/vendas'
+      preLoaderRoute: typeof VendasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pedido/$id': {
       id: '/pedido/$id'
       path: '/pedido/$id'
@@ -181,6 +201,7 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   PrivacidadeRoute: PrivacidadeRoute,
   RastreioRoute: RastreioRoute,
+  VendasRoute: VendasRoute,
   PedidoIdRoute: PedidoIdRoute,
   ProdutosSlugRoute: ProdutosSlugRoute,
   ApiPublicConnectpayWebhookRoute: ApiPublicConnectpayWebhookRoute,
