@@ -2271,7 +2271,6 @@ function Index() {
       <p className={"truncate \x74ext-xs"} style={{ color: "var(--kids-texto-suave)" }}>Mini Cooler IcedCar 45L Personalizado com Seu Carro - 1 unidade</p>
       <p className={"flex items-baseline gap-1.5 \x6ceading-tight"}>
         <span className={"kids-titulo \x74ext-base"}>R$ 99,00</span>
-        <span className="text-[11px] line-through" style={{ color: "var(--kids-texto-suave)" }}>R$ 99,90</span>
       </p>
       <p className={"truncate text-[11px] \x66ont-semibold \x6ceading-tight"} style={{ color: "var(--kids-cta)" }}>ou R$ 89,10 no PIX</p>
     </div>
