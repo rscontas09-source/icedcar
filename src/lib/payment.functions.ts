@@ -70,11 +70,11 @@ function buildBody(data: Base, method: "PIX" | "CREDIT_CARD", extraMeta: Record<
   return { body, fee, amount, orderId };
 }
 
-async function record(data: Base, paymentId: string, method: "PIX" | "CARD", amount: number, fallback: string) {
+async function record(data: Base, paymentId: string, method: "PIX" | "CARD", amount: number, fallback: string, pixCode?: string) {
   const { saveOrder } = await import("./orders.server");
   const n = await saveOrder({ paymentId, method, amount, name: data.payer.name, email: data.payer.email, cpf: data.payer.taxId,
-    city: data.address.city, state: data.address.state, items: data.order.product ? [{ product: data.order.product, quantity: data.order.quantity }] : data.order.items, utms: data.utms });
-  return n ?? fallback;
+    city: data.address.city, state: data.address.state, items: data.order.product ? [{ product: data.order.product, quantity: data.order.quantity }] : data.order.items, utms: data.utms, pixCode });
+  return { number: n?.number ?? fallback, ref: n?.id ?? null };
 }
 
 async function post(key: string, body: unknown) {
@@ -102,8 +102,8 @@ export const createPixPayment = createServerFn({ method: "POST" })
       const pix = r["pix"] as { payload?: unknown } | undefined;
       if (typeof r["id"] !== "string" || typeof pix?.payload !== "string" || !pix.payload) throw new Error("Invalid ConnectPay PIX response");
       const id = "cp_" + r["id"];
-      const number = await record(data, id, "PIX", total, orderId);
-      return { ok: true as const, id, orderId: number, amount: total, copypaste: pix.payload };
+      const saved = await record(data, id, "PIX", total, orderId, pix.payload);
+      return { ok: true as const, id, orderId: saved.number, orderRef: saved.ref, amount: total, copypaste: pix.payload };
     } catch (e) {
       console.error("ConnectPay pix failed", e);
       return { ok: false as const, error: "Não foi possível gerar o PIX. Confira seus dados e tente novamente." };
@@ -127,8 +127,8 @@ export const createCardPayment = createServerFn({ method: "POST" })
       }
       if (json.status === "REFUSED") return { ok: false as const, error: "Cartão recusado pelo banco. Tente outro cartão ou pague no PIX." };
       // the whole response goes back so the 3DS SDK finish() can use it
-      const number = await record(data, json.id, "CARD", (json.amount ?? amount) + fee, orderId);
-      return { ok: true as const, id: json.id, orderId: number, status: json.status ?? "PROCESSING", amount: (json.amount ?? amount) + fee, response: JSON.stringify(json) };
+      const saved = await record(data, json.id, "CARD", (json.amount ?? amount) + fee, orderId);
+      return { ok: true as const, id: json.id, orderId: saved.number, orderRef: saved.ref, status: json.status ?? "PROCESSING", amount: (json.amount ?? amount) + fee, response: JSON.stringify(json) };
     } catch (e) {
       console.error("Masterfy card fetch failed", e);
       return { ok: false as const, error: "Falha de conexão com o pagamento. Tente novamente." };
@@ -180,3 +180,26 @@ async function checkProvider(data: { id: string; amount?: number | undefined }):
 
 /** Publishable key used only to encrypt the card in the browser. */
 export const getTokenizationKey = createServerFn({ method: "GET" }).handler(async () => ({ key: process.env["MASTERFY_TOKENIZATION_KEY"] ?? "" }));
+
+/** Public order page data, looked up by the unguessable order UUID; refreshes provider status while pending. */
+export const getOrder = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: o } = await supabaseAdmin.from("orders")
+      .select("id, order_number, payment_id, method, amount, status, pix_code, customer_name, city, state, items, created_at, paid_at")
+      .eq("id", data.id).maybeSingle();
+    if (!o) return null;
+    let status = o.status, paidAt = o.paid_at;
+    if (status === "pending") {
+      const r = await checkProvider({ id: o.payment_id, amount: o.amount });
+      if (r.status === "PAID" || r.status === "REFUSED") {
+        const { markOrderStatus } = await import("./orders.server");
+        await markOrderStatus(o.payment_id, r.status);
+        status = r.status === "PAID" ? "paid" : "refused";
+        if (status === "paid") paidAt = new Date().toISOString();
+      }
+    }
+    return { id: o.id, number: o.order_number, method: o.method, amount: o.amount, status, pixCode: status === "pending" ? o.pix_code : null,
+      firstName: o.customer_name.split(" ")[0] ?? "", city: o.city, state: o.state, items: o.items, createdAt: o.created_at, paidAt };
+  });

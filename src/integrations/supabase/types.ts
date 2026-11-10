@@ -28,6 +28,7 @@ export type Database = {
           order_number: string
           paid_at: string | null
           payment_id: string
+          pix_code: string | null
           state: string | null
           status: string
           utms: Json
@@ -45,6 +46,7 @@ export type Database = {
           order_number?: string
           paid_at?: string | null
           payment_id: string
+          pix_code?: string | null
           state?: string | null
           status?: string
           utms?: Json
@@ -62,6 +64,7 @@ export type Database = {
           order_number?: string
           paid_at?: string | null
           payment_id?: string
+          pix_code?: string | null
           state?: string | null
           status?: string
           utms?: Json
