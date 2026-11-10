@@ -34,3 +34,4 @@ use the editor.
 - PIX creation uses ConnectPay and cards use Masterfy through src/lib/payment.functions.ts; retain legacy provider status checks for existing charges and recompute prices server-side from src/lib/order.ts so the browser cannot set the amount.
 - Advertising is isolated in a shared browser consent module: explicit acceptance gates Meta loading and confirmed-payment events, with stable payment-based IDs and no replay after refusal, to avoid counting payment attempts as sales.
 - Ready-made coolers live in src/lib/catalog.ts and are ordered via Order.product (items empty); all prices derive from order.ts so PIX discount stays one rule.
+- Post-checkout order page /pedido/$id is keyed by the order UUID (not the sequential number) so orders cannot be enumerated; getOrder refreshes provider status while pending.
