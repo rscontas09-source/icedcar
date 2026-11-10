@@ -35,3 +35,4 @@ use the editor.
 - Advertising is isolated in a shared browser consent module: explicit acceptance gates Meta loading and confirmed-payment events, with stable payment-based IDs and no replay after refusal, to avoid counting payment attempts as sales.
 - Ready-made coolers live in src/lib/catalog.ts and are ordered via Order.product (items empty); all prices derive from order.ts so PIX discount stays one rule.
 - Post-checkout order page /pedido/$id is keyed by the order UUID (not the sequential number) so orders cannot be enumerated; getOrder refreshes provider status while pending.
+- /vendas admin panel is gated by a 4-digit PIN checked server-side on every call against the ADMIN_PIN secret; orders are read only via supabaseAdmin inside that check.
