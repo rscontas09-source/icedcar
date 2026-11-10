@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import capturedCSS from "../../styles/site.css?raw";
@@ -28,12 +28,14 @@ function OrderPage() {
   const [o, setO] = useState<O | null | undefined>(undefined);
   const [now, setNow] = useState(() => Date.now());
   const [copied, setCopied] = useState(false);
+  const cur = useRef<O | null | undefined>(undefined);
+  cur.current = o;
 
   useEffect(() => {
     let off = false;
     const load = async () => { try { const r = await fetchOrder({ data: { id } }); if (!off) setO(r); } catch { if (!off) setO((x) => x ?? null); } };
     void load();
-    const t = setInterval(() => { setO((cur) => { if (!cur || cur.status === "pending") void load(); return cur; }); }, 5000);
+    const t = setInterval(() => { if (cur.current?.status === "pending") void load(); }, 5000);
     const c = setInterval(() => setNow(Date.now()), 1000);
     return () => { off = true; clearInterval(t); clearInterval(c); };
   }, [id, fetchOrder]);
