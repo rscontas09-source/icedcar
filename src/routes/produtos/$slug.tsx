@@ -44,7 +44,7 @@ function ProductPage() {
   const others = PRODUCTS.filter((o) => o.slug !== p.slug).slice(0, 4);
   const current = p.images[img] ?? p.images[0];
   return (
-    <div data-theme="kids" className="min-h-screen" style={{ background: "var(--kids-fundo)", color: "var(--kids-texto)" }}>
+    <div data-tema="kids"><div data-theme="kids" className="min-h-screen" style={{ background: "var(--kids-fundo)", color: "var(--kids-texto)" }}>
       <style>{capturedCSS}</style>
       <header className="p-4 text-center">
         <Link to="/" className="kids-titulo text-xl" style={{ color: "var(--kids-rosa-texto)" }}>Gelaki Brasil</Link>
@@ -105,6 +105,6 @@ function ProductPage() {
           </div>
         </section>
       </main>
-    </div>
+    </div></div>
   );
 }
