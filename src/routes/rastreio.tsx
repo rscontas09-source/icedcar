@@ -86,7 +86,7 @@ function TrackPage() {
     setBusy(false);
   };
   return (
-    <div className="kids-root min-h-screen">
+    <div data-theme="kids" className="min-h-screen" style={{ background: "var(--kids-fundo)", color: "var(--kids-texto)" }}>
       <style>{capturedCSS}</style>
       <header className="p-4 text-center">
         <Link to="/" className="kids-titulo text-xl" style={{ color: "var(--kids-rosa-texto)" }}>Gelaki Brasil</Link>
