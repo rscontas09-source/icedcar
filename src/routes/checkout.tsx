@@ -99,7 +99,7 @@ function Checkout() {
   }, [payId, status, checkStatus, pix]);
 
   useEffect(() => {
-    try { const o = JSON.parse(sessionStorage.getItem(ORDER_KEY) || "null"); if (o && Array.isArray(o.items) && isValidOrder(o)) setOrder(o); } catch { /* empty */ }
+    try { const o = JSON.parse(sessionStorage.getItem(ORDER_KEY) || "null"); if (o && Array.isArray(o.items) && !o.product && isValidOrder(o)) setOrder(o); else sessionStorage.removeItem(ORDER_KEY); } catch { /* empty */ }
     try { const s = JSON.parse(localStorage.getItem("icedcar-buyer") || "null"); if (s) setF((x) => ({ ...x, ...s })); } catch { /* empty */ }
     setLoaded(true);
     const t = setInterval(() => setSecs((s) => (s > 0 ? s - 1 : 0)), 1000);

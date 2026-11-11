@@ -1,10 +1,11 @@
 import { useState, type CSSProperties } from "react";
-import { createFileRoute, Link, notFound, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound, redirect, useNavigate } from "@tanstack/react-router";
 import capturedCSS from "../../styles/site.css?raw";
 import { PRODUCTS, productBySlug } from "@/lib/catalog";
 import { ORDER_KEY, brl, pixPrice, PIX_DISCOUNT, MAX_INSTALLMENTS, FREE_SHIPPING_FROM, SHIPPING_FEE, type Order } from "@/lib/order";
 
 export const Route = createFileRoute("/produtos/$slug")({
+  beforeLoad: () => { throw redirect({ to: "/" }); },
   loader: ({ params }) => {
     const p = productBySlug(params.slug);
     if (!p) throw notFound();
